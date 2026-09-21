@@ -1,7 +1,7 @@
 # Comp Sci 30 Stuff
 
 ## Demos
-- [Chessboard Demo](ChessBoard)
+- [Chessboard Demo](01-chessboard)
 - [Circles On Screen](02-circles)
 
 ## Projects
