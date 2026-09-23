@@ -5,6 +5,7 @@
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
+let direction;
 
 async function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -16,9 +17,10 @@ function draw() {
 
 function mouseWheel(event) {
   if (event.delta > 0) {
-    direction = "up";
+    direction = "down";
   } 
   else {
-    direction = "down";
+    direction = "up";
   }
+  console.log(direction);
 }
