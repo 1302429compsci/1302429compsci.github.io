@@ -13,3 +13,12 @@ async function setup() {
 function draw() {
   background(220);
 }
+
+function mouseWheel(event) {
+  if (event.delta > 0) {
+    direction = "up";
+  } 
+  else {
+    direction = "down";
+  }
+}
