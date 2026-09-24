@@ -6,21 +6,28 @@
 // - describe what you did to take this project "above and beyond"
 
 let direction;
+let backgroundColor = 0;
 
 async function setup() {
-  createCanvas(windowWidth, windowHeight);
+  createCanvas(windowWidth, windowHeight, WEBGL);
 }
 
 function draw() {
-  background(220);
+  background(backgroundColor);
+  box();
+  orbitControl();
 }
 
 function mouseWheel(event) {
   if (event.delta > 0) {
-    direction = "down";
+    if (backgroundColor > 0) {
+      backgroundColor--;
+    }
   } 
   else {
-    direction = "up";
+    if (backgroundColor < 255) {
+      backgroundColor++;
+    }
   }
-  console.log(direction);
+  console.log(backgroundColor);
 }
