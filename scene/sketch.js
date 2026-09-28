@@ -14,7 +14,7 @@ async function setup() {
 
 function draw() {
   background(backgroundColor);
-  box();
+  plane();
   orbitControl();
 }
 
