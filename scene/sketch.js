@@ -13,7 +13,9 @@
 // initialize some variables
 let backgroundColor = 255;
 let platforms = [];
-let startingPlatform;
+let startingPlatformOne;
+let startingPlatformTwo;
+let startingPlatformThree;
 let speed = 5;
 let cube;
 let cubeJumping = false;
@@ -31,7 +33,9 @@ async function setup() {
 
   createCanvas(windowWidth, windowHeight);
   cube = new player(windowWidth/2, windowHeight/2);
-  startingPlatform = platforms.push(new platform(windowWidth/2, windowHeight/1.9, windowWidth/2, windowHeight/25, speed * 0.5));
+  startingPlatformOne = platforms.push(new platform(windowWidth/2, windowHeight/1.9, windowWidth/2, windowHeight/25, speed * 0.5));
+  startingPlatformTwo = platforms.push(new platform(windowWidth/1.5, windowHeight/3, windowWidth/2, windowHeight/25, speed * 0.5));
+  startingPlatformThree = platforms.push(new platform(0, windowHeight/4, windowWidth/2, windowHeight/25, speed * 0.5));
   playerX = windowWidth/2;
   playerY = windowHeight/2;
 
@@ -52,6 +56,7 @@ function draw() {
     background(backgroundColor);
     createPlatforms();
     showFallingPlatforms();
+    cube.updatePos();
     cube.show();
     cube.move();
     cube.fall();
@@ -99,13 +104,16 @@ function createPlatforms() {
 // the platform template
 class platform {
 
-  // platforms contain the data of their x and y coordinates, their length and thickness (width), and their gravity (dy)
-  constructor(x, y, length, thickness, dy) {
+  // platforms contain the data of their x and y coordinates, their length and thickness (width), their gravity (dy), and their other corners
+  constructor(x, y, length, thickness, dy, upRight, downRight, downLeft) {
     this.x = x;
     this.y = y;
     this.length = random(windowWidth/10, windowWidth/5);
     this.thickness = windowHeight/25;
-    this.dy = speed * 0.75;
+    this.dy = speed * random(0.7, 0.8);
+    this.upRight = {x: this.x + this.length, y: this.y};
+    this.downRight = {x: this.x + this.length, y: this.y + this.thickness};
+    this.downLeft = {x: this.x, y: this.y + this.thickness};
   }
 
   // make the platform visible, and color it blue for reasons only tired Matthew knows
@@ -124,12 +132,18 @@ class platform {
 // the player template
 class player {
 
-  // players contain the data of their x and y coordinates, their size, and their gravity
-  constructor(playerX, playerY, size, gravity) {
+  // players contain the data of their x and y coordinates, their size, and their gravity, the location of all their corners, and their previous location
+  constructor(playerX, playerY, size, gravity, topRight, bottomRight, bottomLeft, prevX, prevY) {
     this.playerX = playerX;
     this.playerY = playerY;
-    this.size = 25;
+    this.size = windowHeight/30;
     this.gravity = speed;
+    this.topLeft = {x: this.playerX, y: this.playerY};
+    this.topRight = {x: this.playerX + this.size, y: this.playerY};
+    this.bottomRight = {x: this.playerX + this.size, y: this.playerY + this.size};
+    this.bottomLeft = {x: this.playerX, y: this.playerY + this.size};
+    this.prevX = prevX;
+    this.prevY = prevY;
   }
 
   // make the player visible, and red to contrast with the background and platforms
@@ -169,9 +183,27 @@ class player {
 
   }
 
+  // keep a log of the players position
+  updatePos() {
+
+    this.prevX = this.playerX;
+    this.prevY = this.playerY;
+
+  }
+
   // make the player collide with the platforms, which can't be that hard, right? "Matthew, Thursday, 9:40pm"
   collide() {
     
+    for (let i = 0; i < platforms.length; i++) {
+
+      if (this.playerX >= this.x) {
+        console.log("collision");
+        this.playerX = this.prevX;
+        this.playerY = this.prevY;
+      }
+      
+    }
+
   }
 
 
