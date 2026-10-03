@@ -10,17 +10,19 @@
 // - Also kept my original experiments with the mouse wheel in the code, because clearly it looks very expert, and it adds artificial difficulty
 // - And now I quote this for collision: https://editor.p5js.org/jesse_harding/sketches/xFhjZffBt
 
+// if you ever wonder where the platformer part of this went, gravity wasn't working with collision, so this is plan B, stay on the screen
+// some of that code is just commented out just in case I come back to this project later
+
 // initialize some variables
 let backgroundColor = 255;
 let platforms = [];
-let startingPlatformOne;
-let startingPlatformTwo;
-let startingPlatformThree;
 let speed = 5;
 let cube;
 let cubeJumping = false;
-// let cubeGrounded;
 let jumpHeightMax = 0;
+let speedIncreaseTime = 20;
+let speedLastChanged = 0;
+let timeOnStart = 0;
 
 // get some constants ready, with the game's current state being affected by them
 const START = "start";
@@ -33,9 +35,9 @@ async function setup() {
 
   createCanvas(windowWidth, windowHeight);
   cube = new player(windowWidth/2, windowHeight/2);
-  startingPlatformOne = platforms.push(new platform(windowWidth/2, windowHeight/1.9, windowWidth/2, windowHeight/25, speed * 0.5));
-  startingPlatformTwo = platforms.push(new platform(windowWidth/1.5, windowHeight/3, windowWidth/2, windowHeight/25, speed * 0.5));
-  startingPlatformThree = platforms.push(new platform(0, windowHeight/4, windowWidth/2, windowHeight/25, speed * 0.5));
+  platforms.push(new platform(windowWidth/2, windowHeight/1.5));
+  platforms.push(new platform(windowWidth/1.8, windowHeight/3));
+  platforms.push(new platform(0, windowHeight/4));
   playerX = windowWidth/2;
   playerY = windowHeight/2;
 
@@ -48,19 +50,27 @@ function draw() {
   if (gameState === START) {
     textSize(windowWidth/20);
     fill(255, 0, 0);
-    text("LEFT CLICK TO BEGIN", windowWidth/4.25, windowHeight/2);
+    text("AVOID THE PLATFORMS", windowWidth/4.5, windowHeight/2.5);
+    text("LEFT CLICK TO BEGIN", windowWidth/4.25, windowHeight/1.5);
+    startScreenTime();
   }
 
   // if the game is running, then make a background exist, make platforms do their thing, and make the player have physics and control
+  // also increase the speed every once and a while and display to the player relevant information
   else if (gameState === ACTIVE) {
     background(backgroundColor);
+    for (let i = 0; i < platforms.length; i++) {
+      platforms[i].updatePlatPos();
+    }
+    cube.updatePlayerPos();
     createPlatforms();
     showFallingPlatforms();
-    cube.updatePos();
     cube.show();
     cube.move();
-    cube.fall();
-    // cube.collide();
+    cube.lose();
+    cube.collide();
+    increaseSpeed();
+    displayInformation();
   }
 
   // if the game is over, then cease all control, and put more red text on the screen
@@ -70,6 +80,35 @@ function draw() {
     text("GAME OVER", windowWidth/3.5, windowHeight/2);
   }
   
+}
+
+// make the speed of the game progressively rise
+function increaseSpeed() {
+
+  if (millis()/1000 - timeOnStart > speedLastChanged + speedIncreaseTime) {
+    speedLastChanged = millis()/1000;
+    speed++;
+  }
+
+}
+
+// display information to the player, such as their time played, and level of speed
+function displayInformation() {
+
+  // change the text to something more manageable
+  textSize(25);
+  fill(255, 0, 0);
+
+  //divide millis by 100 to get time in seconds, and subtract it by the time on the start screen to get somewhat accurate in game time
+  text(`Time Survived: ${Math.floor(millis()/1000 - timeOnStart)}`, 0, windowHeight/25);
+  text(`Level: ${speed - 4}`, 0, windowHeight/15);
+
+}
+
+function startScreenTime() {
+
+  timeOnStart = millis()/1000;
+
 }
 
 // make the platforms visible, make them descend, and if they ever fall off the screen, then remove them to avoid lag
@@ -84,7 +123,7 @@ function showFallingPlatforms() {
   // removal of unseen platforms
   for (let i = 0; i < platforms.length; i++) {
 
-    if (platforms[i].y > windowHeight) {
+    if (platforms[i].platY > windowHeight) {
       platforms.splice(i, 1);
     }
 
@@ -92,11 +131,11 @@ function showFallingPlatforms() {
 
 }
 
-// make platforms if there's not enough on screen
+// make platforms if there's less than three on screen
 function createPlatforms() {
 
   if (platforms.length < 3) {
-    platforms.push(new platform(random(0, windowWidth), 0));
+    platforms.push(new platform(random(0, windowWidth - windowWidth/5), 0));
   }
 
 }
@@ -105,26 +144,35 @@ function createPlatforms() {
 class platform {
 
   // platforms contain the data of their x and y coordinates, their length and thickness (width), their gravity (dy), and their other corners
-  constructor(x, y, length, thickness, dy, upRight, downRight, downLeft) {
-    this.x = x;
-    this.y = y;
-    this.length = random(windowWidth/10, windowWidth/5);
+  constructor(platX, platY, length, thickness, dy, upLeft, upRight, downRight, downLeft) {
+    this.platX = platX;
+    this.platY = platY;
+    this.length = random(windowWidth/8, windowWidth/3);
     this.thickness = windowHeight/25;
-    this.dy = speed * random(0.7, 0.8);
-    this.upRight = {x: this.x + this.length, y: this.y};
-    this.downRight = {x: this.x + this.length, y: this.y + this.thickness};
-    this.downLeft = {x: this.x, y: this.y + this.thickness};
+    this.dy = speed * random(0.5, 0.6);
+    this.upLeft = {x: this.platX, y: this.platY};
+    this.upRight = {x: this.platX + this.length, y: this.platY};
+    this.downRight = {x: this.platX + this.length, y: this.platY + this.thickness};
+    this.downLeft = {x: this.platX, y: this.platY + this.thickness};
+  }
+
+  // update the corner positions constantly to keep them recent
+  updatePlatPos() {
+    this.upLeft = {x: this.platX, y: this.platY};
+    this.upRight = {x: this.platX + this.length, y: this.platY};
+    this.downRight = {x: this.platX + this.length, y: this.platY + this.thickness};
+    this.downLeft = {x: this.platX, y: this.platY + this.thickness};
   }
 
   // make the platform visible, and color it blue for reasons only tired Matthew knows
   display() {
     fill(0, 0, 255);
-    rect(this.x, this.y, this.length, this.thickness);
+    rect(this.platX, this.platY, this.length, this.thickness);
   }
 
   // make them fall, because there's no challenge in standing on a stationary platform, by adding gravity to the current y coordinate
   fall() {
-    this.y += this.dy;
+    this.platY += this.dy;
   }
 
 }
@@ -133,17 +181,14 @@ class platform {
 class player {
 
   // players contain the data of their x and y coordinates, their size, and their gravity, the location of all their corners, and their previous location
-  constructor(playerX, playerY, size, gravity, topRight, bottomRight, bottomLeft, prevX, prevY) {
+  constructor(playerX, playerY, size, topLeft, topRight,) {
     this.playerX = playerX;
     this.playerY = playerY;
     this.size = windowHeight/30;
-    this.gravity = speed;
     this.topLeft = {x: this.playerX, y: this.playerY};
     this.topRight = {x: this.playerX + this.size, y: this.playerY};
-    this.bottomRight = {x: this.playerX + this.size, y: this.playerY + this.size};
-    this.bottomLeft = {x: this.playerX, y: this.playerY + this.size};
-    this.prevX = prevX;
-    this.prevY = prevY;
+    // this.bottomRight = {x: this.playerX + this.size, y: this.playerY + this.size};
+    // this.bottomLeft = {x: this.playerX, y: this.playerY + this.size};
   }
 
   // make the player visible, and red to contrast with the background and platforms
@@ -152,7 +197,7 @@ class player {
     square(this.playerX, this.playerY, this.size);
   }
 
-  // make the player capable of movement, because that's a basic requirement of a platformer
+  // make the player capable of movement, because that's a basic requirement of what is no longer a platformer, a platformer avoider perhaps?
   move() {
     // d makes you go right
     if (keyIsDown("d") || keyIsDown(RIGHT_ARROW)) {
@@ -162,7 +207,7 @@ class player {
     if (keyIsDown("a") || keyIsDown(LEFT_ARROW)) {
       this.playerX -= speed;
     }
-    // space or up arrow makes you jump, but you can't jump infinitely, because even I know something doesn't add up there
+    // space or up arrow makes you jump in midair, but you can't jump infinitely, because even I know something doesn't add up there
     if ((keyIsDown(" ") || keyIsDown(UP_ARROW)) && jumpHeightMax < speed * 25) {
       this.playerY -= speed;
       cubeJumping = true;
@@ -174,33 +219,51 @@ class player {
     }
   }
 
-  // make the player also have gravity in the same way the the platforms do, only slightly faster I think
-  fall() {
-
-    if (this.playerY < windowHeight && !cubeJumping) {
-      this.playerY += this.gravity;
+  // make the player lose if they go off screen
+  lose() {
+    
+    if (this.playerY >= windowHeight) {
+      gameState = OVER;
     }
 
   }
 
-  // keep a log of the players position
-  updatePos() {
-
-    this.prevX = this.playerX;
-    this.prevY = this.playerY;
-
+  // make sure that the corners are constantly defined
+  updatePlayerPos() {
+    this.topLeft = {x: this.playerX, y: this.playerY};
+    this.topRight = {x: this.playerX + this.size, y: this.playerY};
+    this.bottomRight = {x: this.playerX + this.size, y: this.playerY + this.size};
+    this.bottomLeft = {x: this.playerX, y: this.playerY + this.size};
   }
 
-  // make the player collide with the platforms, which can't be that hard, right? "Matthew, Thursday, 9:40pm"
+  // make the player collide with the platforms, which can't be that hard, right? (Matthew, Thursday, 9:40pm)
+  // "what a fool I was" (Matthew, Friday, 10:40pm)
   collide() {
     
+    // go through each platform and make the collision check
     for (let i = 0; i < platforms.length; i++) {
 
-      if (this.playerX >= this.x) {
+      // top corners detection
+      if (this.topLeft.x >= platforms[i].downLeft.x && this.bottomLeft.x <= platforms[i].downRight.x && this.topLeft.y >= platforms[i].upLeft.y && this.topLeft.y <= platforms[i].downLeft.y || 
+        this.topRight.x >= platforms[i].downLeft.x && this.topRight.x <= platforms[i].downRight.x && this.topRight.y >= platforms[i].upRight.y && this.topRight.y <= platforms[i].downRight.y) {
+        
+        // if colliding, push the player down at the speed of the platform
         console.log("collision");
-        this.playerX = this.prevX;
-        this.playerY = this.prevY;
+        this.playerY += platforms[i].dy;
+        
       }
+
+      // // bottom corners detection
+      // if (this.bottomLeft.x >= platforms[i].upLeft.x && this.bottomLeft.x <= platforms[i].upRight.x 
+      //   && this.bottomLeft.y >= platforms[i].upLeft.y && this.bottomLeft.y <= platforms[i].downLeft.y || 
+      //   this.bottomRight.x >= platforms[i].upLeft.x && this.bottomRight.x <= platforms[i].upRight.x && 
+      //   this.bottomRight.y >= platforms[i].upRight.y && this.bottomRight.y <= platforms[i].downLeft.y) {
+      //   console.log("collision");
+      //   this.playerY--;
+      //   cubeGrounded = true; 
+      //   cubeHitTop = false;
+      //   jumpHeightMax = 0;
+      // }
       
     }
 
@@ -218,7 +281,7 @@ function mouseClicked() {
 
 }
 
-// and finally, the oldest piece of code here, make the background color customizable with the mouse wheel
+// and finally, one of the oldest pieces of code here, make the background color customizable with the mouse wheel
 function mouseWheel(event) {
 
   if (event.delta > 0) {
@@ -231,6 +294,5 @@ function mouseWheel(event) {
       backgroundColor++;
     }
   }
-  console.log(backgroundColor);
   
 }
