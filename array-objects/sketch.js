@@ -37,8 +37,6 @@ async function setup() {
   platforms.push(new platform(windowWidth/2, windowHeight/1.5));
   platforms.push(new platform(windowWidth/1.8, windowHeight/3));
   platforms.push(new platform(0, windowHeight/4));
-  playerX = windowWidth/2;
-  playerY = windowHeight/2;
 
 }
 
@@ -101,6 +99,7 @@ function displayInformation() {
   //divide millis by 100 to get time in seconds, and subtract it by the time on the start screen to get somewhat accurate in game time
   text(`Time Survived: ${Math.floor(millis()/1000 - timeOnStart)}`, 0, windowHeight/25);
   text(`Level: ${speed - 4}`, 0, windowHeight/15);
+  text(`Ground?: ${cubeGrounded}`, 0, windowHeight/5);
 
 }
 
@@ -148,7 +147,8 @@ class platform {
     this.platY = platY;
     this.length = random(windowWidth/8, windowWidth/3);
     this.thickness = windowHeight/25;
-    this.dy = speed * random(0.5, 0.6);
+    // this.dy = speed * random(0.5, 0.6);
+    this.dy = 0;
     this.upLeft = {x: this.platX, y: this.platY};
     this.upRight = {x: this.platX + this.length, y: this.platY};
     this.downRight = {x: this.platX + this.length, y: this.platY + this.thickness};
@@ -255,9 +255,9 @@ class player {
         this.playerY += platforms[i].dy;
         
       }
-      else {
-        cubeHitTop = false;
-      }
+      // else {
+      //   cubeHitTop = false;
+      // }
 
       // bottom corners detection
       if (this.bottomLeft.x >= platforms[i].upLeft.x && this.bottomLeft.x <= platforms[i].upRight.x && this.bottomLeft.y >= platforms[i].upLeft.y && this.bottomLeft.y <= platforms[i].downLeft.y || this.bottomRight.x >= platforms[i].upLeft.x && this.bottomRight.x <= platforms[i].upRight.x && this.bottomRight.y >= platforms[i].upRight.y && this.bottomRight.y <= platforms[i].downLeft.y) {
@@ -266,12 +266,12 @@ class player {
         cubeGrounded = true; 
         cubeHitTop = false;
         jumpHeightMax = 0;
-        this.playerY += platforms[i].dy;
+        this.playerY--;
+        // this.playerY += platforms[i].dy;
 
       }
       else {
         cubeGrounded = false;
-        cube.descend();
       }
       
     }
