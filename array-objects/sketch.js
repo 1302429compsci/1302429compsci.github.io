@@ -64,8 +64,8 @@ function draw() {
     showFallingPlatforms();
     cube.show();
     cube.move();
-    cube.descend();
     cube.collide();
+    cube.descend();
     increaseSpeed();
     displayInformation();
   }
@@ -99,7 +99,7 @@ function displayInformation() {
   //divide millis by 100 to get time in seconds, and subtract it by the time on the start screen to get somewhat accurate in game time
   text(`Time Survived: ${Math.floor(millis()/1000 - timeOnStart)}`, 0, windowHeight/25);
   text(`Level: ${speed - 4}`, 0, windowHeight/15);
-  text(`Ground?: ${cubeGrounded}`, 0, windowHeight/5);
+  text(`Ground?: ${cubeGrounded} Hit Top?: ${cubeHitTop}`, 0, windowHeight/5);
 
 }
 
@@ -242,25 +242,32 @@ class player {
 
   // make the player collide, the bane of my existence
   collide() {
-    
+
     // go through each platform and make the collision check
     for (let i = 0; i < platforms.length; i++) {
 
       // top corners detection
-      if (this.topLeft.x >= platforms[i].downLeft.x && this.bottomLeft.x <= platforms[i].downRight.x && this.topLeft.y >= platforms[i].upLeft.y && this.topLeft.y <= platforms[i].downLeft.y || this.topRight.x >= platforms[i].downLeft.x && this.topRight.x <= platforms[i].downRight.x && this.topRight.y >= platforms[i].upRight.y && this.topRight.y <= platforms[i].downRight.y) {
+      if (this.topLeft.x >= platforms[i].downLeft.x && this.bottomLeft.x <= platforms[i].downRight.x && 
+        this.topLeft.y >= platforms[i].upLeft.y && this.topLeft.y <= platforms[i].downLeft.y || 
+        this.topRight.x >= platforms[i].downLeft.x && this.topRight.x <= platforms[i].downRight.x && 
+        this.topRight.y >= platforms[i].upRight.y && this.topRight.y <= platforms[i].downRight.y) {
         
         // if colliding, push the player down at the speed of the platform
         console.log("collision");
         cubeHitTop = true;
         this.playerY += platforms[i].dy;
+        break;
         
       }
-      // else {
-      //   cubeHitTop = false;
-      // }
+      else {
+        cubeHitTop = false;
+      }
 
       // bottom corners detection
-      if (this.bottomLeft.x >= platforms[i].upLeft.x && this.bottomLeft.x <= platforms[i].upRight.x && this.bottomLeft.y >= platforms[i].upLeft.y && this.bottomLeft.y <= platforms[i].downLeft.y || this.bottomRight.x >= platforms[i].upLeft.x && this.bottomRight.x <= platforms[i].upRight.x && this.bottomRight.y >= platforms[i].upRight.y && this.bottomRight.y <= platforms[i].downLeft.y) {
+      if (this.bottomLeft.x >= platforms[i].upLeft.x && this.bottomLeft.x <= platforms[i].upRight.x && 
+        this.bottomLeft.y >= platforms[i].upLeft.y && this.bottomLeft.y <= platforms[i].downLeft.y || 
+        this.bottomRight.x >= platforms[i].upLeft.x && this.bottomRight.x <= platforms[i].upRight.x && 
+        this.bottomRight.y >= platforms[i].upRight.y && this.bottomRight.y <= platforms[i].downLeft.y) {
         
         console.log("collision");
         cubeGrounded = true; 
@@ -268,6 +275,7 @@ class player {
         jumpHeightMax = 0;
         this.playerY--;
         // this.playerY += platforms[i].dy;
+        break;
 
       }
       else {
