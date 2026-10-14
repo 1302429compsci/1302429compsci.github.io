@@ -43,6 +43,12 @@ async function setup() {
 // check which state the player is in, and act accordingly
 function draw() {
 
+  runGame();
+  
+}
+
+function runGame() {
+
   // if things haven't started, then do nothing but display red text (truly a genius start screen)
   if (gameState === START) {
     textSize(windowWidth/20);
@@ -147,8 +153,8 @@ class platform {
     this.platY = platY;
     this.length = random(windowWidth/8, windowWidth/3);
     this.thickness = windowHeight/25;
-    // this.dy = speed * random(0.5, 0.6);
-    this.dy = 0;
+    this.dy = speed * random(0.5, 0.6);
+    // this.dy = 0;
     this.upLeft = {x: this.platX, y: this.platY};
     this.upRight = {x: this.platX + this.length, y: this.platY};
     this.downRight = {x: this.platX + this.length, y: this.platY + this.thickness};
@@ -169,9 +175,14 @@ class platform {
     rect(this.platX, this.platY, this.length, this.thickness);
   }
 
-  // make them fall, because there's no challenge in standing on a stationary platform, by adding gravity to the current y coordinate
+  // make them fall, because there's no challenge in standing on a stationary platform, by adding dy to the current y coordinate
   fall() {
     this.platY += this.dy;
+  }
+
+  // make platforms change direction if they collide with other platforms
+  bounce() {
+
   }
 
 }
@@ -179,8 +190,8 @@ class platform {
 // the player template
 class player {
 
-  // players contain the data of their x and y coordinates, their size, and their gravity, the location of all their corners, and their previous location
-  constructor(playerX, playerY, size, topLeft, topRight, gravity) {
+  // players contain the data of their x and y coordinates, their size, and the location of all their corners, and their previous location
+  constructor(playerX, playerY, size, topLeft, topRight) {
     this.playerX = playerX;
     this.playerY = playerY;
     this.size = windowHeight/30;
@@ -188,7 +199,6 @@ class player {
     this.topRight = {x: this.playerX + this.size, y: this.playerY};
     this.bottomRight = {x: this.playerX + this.size, y: this.playerY + this.size};
     this.bottomLeft = {x: this.playerX, y: this.playerY + this.size};
-    this.gravity = speed;
   }
 
   // make the player visible, and red to contrast with the background and platforms
@@ -223,7 +233,7 @@ class player {
   descend() {
 
     if (!cubeGrounded && !cubeHitTop && !cubeJumping) {
-      this.playerY += this.gravity;
+      this.playerY += speed;
     }
     
     if (this.playerY >= windowHeight) {
@@ -274,7 +284,6 @@ class player {
         cubeHitTop = false;
         jumpHeightMax = 0;
         this.playerY--;
-        // this.playerY += platforms[i].dy;
         break;
 
       }
