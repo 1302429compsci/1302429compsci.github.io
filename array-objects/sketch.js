@@ -18,7 +18,7 @@ let cube;
 let cubeJumping = false;
 let cubeGrounded = false;
 let cubeHitTop = false;
-let jumpHeightMax = 0;
+let jumpHeightMax = 99999;
 let speedIncreaseTime = 20;
 let speedLastChanged = 0;
 let timeOnStart = 0;
@@ -33,10 +33,10 @@ let gameState = START;
 async function setup() {
 
   createCanvas(windowWidth, windowHeight);
-  cube = new player(windowWidth/2, windowHeight/2);
-  platforms.push(new platform(windowWidth/2, windowHeight/1.5));
-  platforms.push(new platform(windowWidth/1.8, windowHeight/3));
-  platforms.push(new platform(0, windowHeight/4));
+  cube = new player(windowWidth/2, windowHeight/2, windowWidth/3);
+  platforms.push(new platform(windowWidth/2, windowHeight/1.5, windowWidth/3));
+  platforms.push(new platform(windowWidth/1.8, windowHeight/3, windowWidth/3));
+  platforms.push(new platform(0, windowHeight/4, windowWidth/3));
 
 }
 
@@ -62,9 +62,6 @@ function runGame() {
   // also increase the speed every once and a while and display to the player relevant information
   else if (gameState === ACTIVE) {
     background(backgroundColor);
-    for (let i = 0; i < platforms.length; i++) {
-      platforms[i].updatePlatPos();
-    }
     cube.updatePlayerPos();
     createPlatforms();
     showFallingPlatforms();
@@ -120,6 +117,7 @@ function showFallingPlatforms() {
 
   // descent and visibility
   for (let i = 0; i < platforms.length; i++) {
+    platforms[i].updatePlatPos();
     platforms[i].display();
     platforms[i].fall();
   }
@@ -139,7 +137,7 @@ function showFallingPlatforms() {
 function createPlatforms() {
 
   if (platforms.length < 3) {
-    platforms.push(new platform(random(0, windowWidth - windowWidth/5), 0));
+    platforms.push(new platform(random(0, windowWidth - windowWidth/5), 0, random(windowWidth/8, windowWidth/3)));
   }
 
 }
@@ -148,10 +146,10 @@ function createPlatforms() {
 class platform {
 
   // platforms contain the data of their x and y coordinates, their length and thickness (width), their gravity (dy), and their other corners
-  constructor(platX, platY, length, thickness, dy, upLeft, upRight, downRight, downLeft) {
+  constructor(platX, platY, platLength, thickness, dy, upLeft, upRight, downRight, downLeft) {
     this.platX = platX;
     this.platY = platY;
-    this.length = random(windowWidth/8, windowWidth/3);
+    this.length = platLength;
     this.thickness = windowHeight/25;
     this.dy = speed * random(0.5, 0.6);
     // this.dy = 0;
@@ -223,7 +221,7 @@ class player {
       cubeJumping = true;
       jumpHeightMax += 1;
     }
-    // if you're not jumping, then let javascript know, because has not gotten any smarter
+    // if you're not jumping, then let javascript know, because it has not gotten any smarter
     else {
       cubeJumping = false;
     }
@@ -265,7 +263,7 @@ class player {
         // if colliding, push the player down at the speed of the platform
         console.log("collision");
         cubeHitTop = true;
-        this.playerY += platforms[i].dy;
+        this.playerY += platforms[i].dy + 1;
         break;
         
       }
@@ -295,6 +293,14 @@ class player {
 
   }
 
+
+}
+
+function keyReleased() {
+
+  if (key === " " || key === UP_ARROW) {
+    jumpHeightMax = 99999;
+  }
 
 }
 
