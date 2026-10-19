@@ -18,7 +18,8 @@ let cube;
 let cubeJumping = false;
 let cubeGrounded = false;
 let cubeHitTop = false;
-let jumpHeightMax = 99999;
+const NO_JUMP = 2**52;
+let jumpHeightMax = NO_JUMP;
 let speedIncreaseTime = 20;
 let speedLastChanged = 0;
 let timeOnStart = 0;
@@ -102,7 +103,7 @@ function displayInformation() {
   //divide millis by 100 to get time in seconds, and subtract it by the time on the start screen to get somewhat accurate in game time
   text(`Time Survived: ${Math.floor(millis()/1000 - timeOnStart)}`, 0, windowHeight/25);
   text(`Level: ${speed - 4}`, 0, windowHeight/15);
-  text(`Ground?: ${cubeGrounded} Hit Top?: ${cubeHitTop}`, 0, windowHeight/5);
+  text(`Ground?: ${cubeGrounded} jumpHeightMax: ${jumpHeightMax}`, 0, windowHeight/5);
 
 }
 
@@ -136,7 +137,7 @@ function showFallingPlatforms() {
 // make platforms if there's less than three on screen
 function createPlatforms() {
 
-  if (platforms.length < 3) {
+  if (platforms.length < 4) {
     platforms.push(new platform(random(0, windowWidth - windowWidth/5), 0, random(windowWidth/8, windowWidth/3)));
   }
 
@@ -299,7 +300,7 @@ class player {
 function keyReleased() {
 
   if (key === " " || key === UP_ARROW) {
-    jumpHeightMax = 99999;
+    jumpHeightMax = NO_JUMP;
   }
 
 }
