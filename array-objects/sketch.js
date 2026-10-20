@@ -34,10 +34,10 @@ let gameState = START;
 async function setup() {
 
   createCanvas(windowWidth, windowHeight);
-  cube = new player(windowWidth/2, windowHeight/2, windowWidth/3);
-  platforms.push(new platform(windowWidth/2, windowHeight/1.5, windowWidth/3));
-  platforms.push(new platform(windowWidth/1.8, windowHeight/3, windowWidth/3));
-  platforms.push(new platform(0, windowHeight/4, windowWidth/3));
+  cube = new Player(windowWidth/2, windowHeight/2, windowWidth/3);
+  platforms.push(new Platform(windowWidth/2, windowHeight/1.5, windowWidth/3));
+  platforms.push(new Platform(windowWidth/1.8, windowHeight/3, windowWidth/3));
+  platforms.push(new Platform(0, windowHeight/4, windowWidth/3));
 
 }
 
@@ -68,6 +68,7 @@ function runGame() {
     showFallingPlatforms();
     cube.show();
     cube.move();
+    noDoubleJumping();
     cube.collide();
     cube.descend();
     increaseSpeed();
@@ -116,20 +117,17 @@ function startScreenTime() {
 // make the platforms visible, make them descend, and if they ever fall off the screen, then remove them to avoid lag
 function showFallingPlatforms() {
 
-  // descent and visibility
-  for (let i = 0; i < platforms.length; i++) {
+  // run a loop that iterates through every platform to execute necessary things
+  for (let i = platforms.length - 1; i >= 0; i--) {
+    // descent and visibility
     platforms[i].updatePlatPos();
     platforms[i].display();
     platforms[i].fall();
-  }
 
-  // removal of unseen platforms
-  for (let i = 0; i < platforms.length; i++) {
-
+    // remove unseen platforms
     if (platforms[i].platY > windowHeight) {
       platforms.splice(i, 1);
     }
-
   }
 
 }
@@ -138,16 +136,16 @@ function showFallingPlatforms() {
 function createPlatforms() {
 
   if (platforms.length < 4) {
-    platforms.push(new platform(random(0, windowWidth - windowWidth/5), 0, random(windowWidth/8, windowWidth/3)));
+    platforms.push(new Platform(random(0, windowWidth - windowWidth/5), 0, random(windowWidth/8, windowWidth/3)));
   }
 
 }
 
 // the platform template
-class platform {
+class Platform {
 
   // platforms contain the data of their x and y coordinates, their length and thickness (width), their gravity (dy), and their other corners
-  constructor(platX, platY, platLength, thickness, dy, upLeft, upRight, downRight, downLeft) {
+  constructor(platX, platY, platLength) {
     this.platX = platX;
     this.platY = platY;
     this.length = platLength;
@@ -187,10 +185,10 @@ class platform {
 }
 
 // the player template
-class player {
+class Player {
 
   // players contain the data of their x and y coordinates, their size, and the location of all their corners, and their previous location
-  constructor(playerX, playerY, size, topLeft, topRight) {
+  constructor(playerX, playerY) {
     this.playerX = playerX;
     this.playerY = playerY;
     this.size = windowHeight/30;
@@ -253,7 +251,7 @@ class player {
   collide() {
 
     // go through each platform and make the collision check
-    for (let i = 0; i < platforms.length; i++) {
+    for (let i = platforms.length - 1; i >= 0; i--) {
 
       // top corners detection
       if (this.topLeft.x >= platforms[i].downLeft.x && this.bottomLeft.x <= platforms[i].downRight.x && 
@@ -297,9 +295,9 @@ class player {
 
 }
 
-function keyReleased() {
+function noDoubleJumping() {
 
-  if (key === " " || key === UP_ARROW) {
+  if (jumpHeightMax > 0 && cubeJumping === false) {
     jumpHeightMax = NO_JUMP;
   }
 
