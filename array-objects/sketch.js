@@ -54,7 +54,7 @@ function runGame() {
   if (gameState === START) {
     textSize(windowWidth/20);
     fill(255, 0, 0);
-    text("AVOID THE PLATFORMS", windowWidth/4.5, windowHeight/2.5);
+    text("DON'T GO OFF SCREEN", windowWidth/4.5, windowHeight/2.5);
     text("LEFT CLICK TO BEGIN", windowWidth/4.25, windowHeight/1.5);
     startScreenTime();
   }
@@ -62,6 +62,7 @@ function runGame() {
   // if the game is running, then make a background exist, make platforms do their thing, and make the player have physics and control
   // also increase the speed every once and a while and display to the player relevant information
   else if (gameState === ACTIVE) {
+    cube.checkOnScreen();
     background(backgroundColor);
     cube.updatePlayerPos();
     createPlatforms();
@@ -226,15 +227,11 @@ class Player {
     }
   }
 
-  // make the player lose if they go off screen, and constantly be falling off screen
+  // make the player constantly be falling off screen
   descend() {
 
     if (!cubeGrounded && !cubeHitTop && !cubeJumping) {
       this.playerY += speed;
-    }
-    
-    if (this.playerY >= windowHeight) {
-      gameState = OVER;
     }
 
   }
@@ -292,6 +289,14 @@ class Player {
 
   }
 
+  // if the player if off screen, end the game
+  checkOnScreen() {
+
+    if (this.topLeft.y > windowHeight || this.bottomLeft.y < 0 || this.topLeft.x > windowWidth || this.topRight.x < 0) {
+      gameState = OVER;
+    }
+
+  }
 
 }
 
