@@ -126,7 +126,7 @@ function showFallingPlatforms() {
     platforms[i].fall();
 
     // remove unseen platforms
-    if (platforms[i].platY > windowHeight) {
+    if (platforms[i].upLeft.y > windowHeight || platforms[i].downLeft.y < 0) {
       platforms.splice(i, 1);
     }
   }
@@ -183,19 +183,17 @@ class Platform {
 
     for (let i = platforms.length - 1; i >= 0; i--) {
 
-
       // collision bottom corners
-      if (this.bottomLeft.x >= platforms[i].upLeft.x && this.bottomLeft.x <= platforms[i].upRight.x && 
+      if (this !== platforms[i] &&
+        this.bottomLeft.x >= platforms[i].upLeft.x && this.bottomLeft.x <= platforms[i].upRight.x && 
         this.bottomLeft.y >= platforms[i].upLeft.y && this.bottomLeft.y <= platforms[i].downLeft.y || 
         this.bottomRight.x >= platforms[i].upLeft.x && this.bottomRight.x <= platforms[i].upRight.x && 
         this.bottomRight.y >= platforms[i].upRight.y && this.bottomRight.y <= platforms[i].downLeft.y) {
         
         console.log("collision");
+        platforms[i].dy *= -1;
         break;
 
-      }
-      else {
-        
       }
 
     }
