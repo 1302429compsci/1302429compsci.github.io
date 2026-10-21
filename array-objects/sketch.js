@@ -181,6 +181,25 @@ class Platform {
   // make platforms change direction if they collide with other platforms
   bounce() {
 
+    for (let i = platforms.length - 1; i >= 0; i--) {
+
+
+      // collision bottom corners
+      if (this.bottomLeft.x >= platforms[i].upLeft.x && this.bottomLeft.x <= platforms[i].upRight.x && 
+        this.bottomLeft.y >= platforms[i].upLeft.y && this.bottomLeft.y <= platforms[i].downLeft.y || 
+        this.bottomRight.x >= platforms[i].upLeft.x && this.bottomRight.x <= platforms[i].upRight.x && 
+        this.bottomRight.y >= platforms[i].upRight.y && this.bottomRight.y <= platforms[i].downLeft.y) {
+        
+        console.log("collision");
+        break;
+
+      }
+      else {
+        
+      }
+
+    }
+
   }
 
 }
