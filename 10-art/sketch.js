@@ -1,14 +1,14 @@
 // Randomized Art
 
 let theTiles = [];
-const THE_SIZE = 25;
+const THE_SIZE = 10;
 
 async function setup() {
   createCanvas(windowWidth, windowHeight);
 
   for (let y = 0; y <= height; y += THE_SIZE) {
     for (let x = 0; x <= width; x += THE_SIZE) {
-      let someTile = spawnTile(x, 100, THE_SIZE);
+      let someTile = spawnTile(x, y, THE_SIZE);
       theTiles.push(someTile);
     }
   }
