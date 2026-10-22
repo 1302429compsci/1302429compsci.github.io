@@ -185,10 +185,10 @@ class Platform {
 
       // collision bottom corners
       if (this !== platforms[i] &&
-        this.bottomLeft.x >= platforms[i].upLeft.x && this.bottomLeft.x <= platforms[i].upRight.x && 
-        this.bottomLeft.y >= platforms[i].upLeft.y && this.bottomLeft.y <= platforms[i].downLeft.y || 
-        this.bottomRight.x >= platforms[i].upLeft.x && this.bottomRight.x <= platforms[i].upRight.x && 
-        this.bottomRight.y >= platforms[i].upRight.y && this.bottomRight.y <= platforms[i].downLeft.y) {
+        this.topLeft.x >= platforms[i].downLeft.x && this.bottomLeft.x <= platforms[i].downRight.x && 
+        this.topLeft.y >= platforms[i].upLeft.y && this.topLeft.y <= platforms[i].downLeft.y || 
+        this.topRight.x >= platforms[i].downLeft.x && this.topRight.x <= platforms[i].downRight.x && 
+        this.topRight.y >= platforms[i].upRight.y && this.topRight.y <= platforms[i].downRight.y) {
         
         console.log("collision");
         platforms[i].dy *= -1;
