@@ -23,6 +23,7 @@ let jumpHeightMax = NO_JUMP;
 let speedIncreaseTime = 20;
 let speedLastChanged = 0;
 let timeOnStart = 0;
+let sillySong;
 
 // get some constants ready, with the game's current state being affected by them
 const START = "start";
@@ -34,10 +35,12 @@ let gameState = START;
 async function setup() {
 
   createCanvas(windowWidth, windowHeight);
+  sillySong = await loadSound("sillySong.ogg");
   cube = new Player(windowWidth/2, windowHeight/2, windowWidth/3);
   platforms.push(new Platform(windowWidth/2, windowHeight/1.5, windowWidth/3));
   platforms.push(new Platform(windowWidth/1.8, windowHeight/3, windowWidth/3));
   platforms.push(new Platform(0, windowHeight/4, windowWidth/3));
+  sillySong.loop();
 
 }
 
