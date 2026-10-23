@@ -24,6 +24,7 @@ let speedIncreaseTime = 20;
 let speedLastChanged = 0;
 let timeOnStart = 0;
 let sillySong;
+let gameOver;
 
 // get some constants ready, with the game's current state being affected by them
 const START = "start";
@@ -36,11 +37,11 @@ async function setup() {
 
   createCanvas(windowWidth, windowHeight);
   sillySong = await loadSound("sillySong.ogg");
+  gameOver = await loadSound("game_over_bad_chest.wav");
   cube = new Player(windowWidth/2, windowHeight/2, windowWidth/3);
   platforms.push(new Platform(windowWidth/2, windowHeight/1.5, windowWidth/3));
   platforms.push(new Platform(windowWidth/1.8, windowHeight/3, windowWidth/3));
   platforms.push(new Platform(0, windowHeight/4, windowWidth/3));
-  sillySong.loop();
 
 }
 
@@ -83,7 +84,9 @@ function runGame() {
   else if (gameState === OVER) {
     textSize(windowWidth/15);
     fill(255, 0, 0);
-    text("GAME OVER", windowWidth/3.5, windowHeight/2);
+    text("GAME OVER", windowWidth/3.5, windowHeight/2.2);
+    textSize(windowWidth/25);
+    text("RELOAD PAGE TO PLAY AGAIN", windowWidth/5, windowHeight/1.8);
   }
   
 }
@@ -127,6 +130,7 @@ function showFallingPlatforms() {
     platforms[i].updatePlatPos();
     platforms[i].display();
     platforms[i].fall();
+    platforms[i].bounce();
 
     // remove unseen platforms
     if (platforms[i].upLeft.y > windowHeight || platforms[i].downLeft.y < 0) {
@@ -187,11 +191,11 @@ class Platform {
     for (let i = platforms.length - 1; i >= 0; i--) {
 
       // collision bottom corners
-      if (this !== platforms[i] &&
-        this.topLeft.x >= platforms[i].downLeft.x && this.bottomLeft.x <= platforms[i].downRight.x && 
-        this.topLeft.y >= platforms[i].upLeft.y && this.topLeft.y <= platforms[i].downLeft.y || 
-        this.topRight.x >= platforms[i].downLeft.x && this.topRight.x <= platforms[i].downRight.x && 
-        this.topRight.y >= platforms[i].upRight.y && this.topRight.y <= platforms[i].downRight.y) {
+      if (this.platforms[i] !== platforms[i] &&
+        this.upLeft.x >= platforms[i].downLeft.x && this.upLeft.x <= platforms[i].downRight.x && 
+        this.upLeft.y >= platforms[i].upLeft.y && this.upLeft.y <= platforms[i].downLeft.y || 
+        this.upRight.x >= platforms[i].downLeft.x && this.upRight.x <= platforms[i].downRight.x && 
+        this.upRight.y >= platforms[i].upRight.y && this.upRight.y <= platforms[i].downRight.y) {
         
         console.log("collision");
         platforms[i].dy *= -1;
@@ -271,7 +275,7 @@ class Player {
     for (let i = platforms.length - 1; i >= 0; i--) {
 
       // top corners detection
-      if (this.topLeft.x >= platforms[i].downLeft.x && this.bottomLeft.x <= platforms[i].downRight.x && 
+      if (this.topLeft.x >= platforms[i].downLeft.x && this.topLeft.x <= platforms[i].downRight.x && 
         this.topLeft.y >= platforms[i].upLeft.y && this.topLeft.y <= platforms[i].downLeft.y || 
         this.topRight.x >= platforms[i].downLeft.x && this.topRight.x <= platforms[i].downRight.x && 
         this.topRight.y >= platforms[i].upRight.y && this.topRight.y <= platforms[i].downRight.y) {
@@ -314,6 +318,8 @@ class Player {
 
     if (this.topLeft.y > windowHeight || this.bottomLeft.y < 0 || this.topLeft.x > windowWidth || this.topRight.x < 0) {
       gameState = OVER;
+      sillySong.stop();
+      gameOver.start();
     }
 
   }
@@ -333,6 +339,11 @@ function mouseClicked() {
 
   if (gameState === START) {
     gameState = ACTIVE;
+    sillySong.loop(true);
+  }
+
+  if (!sillySong.playing && gameState === ACTIVE) {
+    sillySong.start();
   }
 
 }
