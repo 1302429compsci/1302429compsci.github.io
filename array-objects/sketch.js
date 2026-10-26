@@ -13,7 +13,7 @@
 // initialize some variables
 let backgroundColor = 255;
 let platforms = [];
-let speed = 5;
+let speed = 7;
 let cube;
 let cubeJumping = false;
 let cubeGrounded = false;
@@ -164,6 +164,7 @@ class Platform {
     this.upRight = {x: this.platX + this.length, y: this.platY};
     this.downRight = {x: this.platX + this.length, y: this.platY + this.thickness};
     this.downLeft = {x: this.platX, y: this.platY + this.thickness};
+    this.upCenter = {x: this.platX + this.length/2, y: this.platY};
   }
 
   // update the corner positions constantly to keep them recent
@@ -172,6 +173,7 @@ class Platform {
     this.upRight = {x: this.platX + this.length, y: this.platY};
     this.downRight = {x: this.platX + this.length, y: this.platY + this.thickness};
     this.downLeft = {x: this.platX, y: this.platY + this.thickness};
+    this.upCenter = {x: this.platX + this.length/2, y: this.platY};
   }
 
   // make the platform visible, and color it blue for reasons only tired Matthew knows
@@ -190,14 +192,22 @@ class Platform {
 
     for (let i = platforms.length - 1; i >= 0; i--) {
 
-      // collision bottom corners
-      if (this.platforms[i] !== platforms[i] &&
+      // check that the top left, top right, and middle points of the lower platform aren't touching another platform
+      // if they are, bounce the colliding platform away by reversing its gravity
+      if (this !== platforms[i] &&
+        //top left corner
         this.upLeft.x >= platforms[i].downLeft.x && this.upLeft.x <= platforms[i].downRight.x && 
         this.upLeft.y >= platforms[i].upLeft.y && this.upLeft.y <= platforms[i].downLeft.y || 
+        //top right corner
+        this !== platforms[i] &&
         this.upRight.x >= platforms[i].downLeft.x && this.upRight.x <= platforms[i].downRight.x && 
-        this.upRight.y >= platforms[i].upRight.y && this.upRight.y <= platforms[i].downRight.y) {
+        this.upRight.y >= platforms[i].upRight.y && this.upRight.y <= platforms[i].downRight.y || 
+        // top middle
+        this !== platforms[i] && 
+        this.upCenter.x >= platforms[i].downLeft.x && this.upCenter.x <= platforms[i].downRight.x && 
+        this.upCenter.y >= platforms[i].upLeft.y && this.upCenter.y <= platforms[i].downLeft.y) {
         
-        console.log("collision");
+        console.log("plat collision");
         platforms[i].dy *= -1;
         break;
 
