@@ -3,7 +3,9 @@
 // Sept 22 2026
 //
 // Extra for Experts:
-
+// - I'm going to be honest, classes are the main thing that this project does that you haven't talked about yet
+// - Expanding on my previous version did let me figure out what the keyword this is really doing here
+// - Other than that, this project is made of arrays and object notation, as you've asked for
 
 
 // - Classes https://www.w3schools.com/js/js_classes.asp
@@ -13,7 +15,7 @@
 // initialize some variables
 let backgroundColor = 255;
 let platforms = [];
-let speed = 7;
+let speed = 5;
 let cube;
 let cubeJumping = false;
 let cubeGrounded = false;
