@@ -56,16 +56,15 @@ function generateRandomTerrain(cols, rows) {
 
   for (let y = 0; y < rows; y++) {
     newGrid.push([]);
+
     for (let x = 0; x < cols; x++) {
-      if (newGrid[y][x - 1] === 1 || newGrid[y - 1][x] === 1) {
-        canWater = true;
-      }
+
       if (random(100) < 10 && rocksOnMap < 25 && rockOffset === 0) {
         newGrid[y].push(0);
         rockOffset = floor(random(rows, rows * 3));
         rocksOnMap++;
       }
-      else if (random(100) < 15 || canWater && random(100) < 50) {
+      else if (random(100) < 15 || canWater && random(100) < 75) {
         newGrid[y].push(1);
       }
       else {
@@ -74,7 +73,14 @@ function generateRandomTerrain(cols, rows) {
           rockOffset--;
         }
       }
-      console.log(rockOffset);
+
+      if (newGrid[y][x - 1] === 1 || newGrid[y - 1][x] === 1) {
+        canWater = true;
+      }
+      else {
+        canWater = false;
+      }
+      
     }
   }
   return newGrid;
