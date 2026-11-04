@@ -1,7 +1,7 @@
 // 2d rectangular grid demo
 
 const CELL_SIZE = 10;
-const RENDER_ON_MULTIPLES_OF = 5;
+const RENDER_ON_MULTIPLES_OF = 4;
 let rows;
 let cols;
 let grid;
@@ -114,7 +114,7 @@ function displayGrid() {
         fill('white');
       }
       else if (grid[y][x] === 1) {
-        fill('black');
+        fill(random(255), random(255), random(255));
       }
       square(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE);
     }

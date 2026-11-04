@@ -31,13 +31,13 @@ function displayGrid() {
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
       if (grid[y][x] === 0) {
-        fill("grey");
+        fill("lightgreen");
       }
       else if (grid[y][x] === 1) {
         fill("lightblue");
       }
       else if (grid[y][x] === 2) {
-        fill("lightgreen");
+        fill("grey");
       }
       square(x * cellSize, y * cellSize, cellSize);
     }
@@ -47,44 +47,67 @@ function displayGrid() {
 
 function generateRandomTerrain(cols, rows) {
 
-  let newGrid = [];
+  let mapGen = generateEmptyField(cols, rows);
 
   let rocksOnMap = 0;
   let rockOffset = 0;
 
   let canWater;
+  let waterOnMap = 0;
 
   for (let y = 0; y < rows; y++) {
-    newGrid.push([]);
 
     for (let x = 0; x < cols; x++) {
 
       if (random(100) < 10 && rocksOnMap < 25 && rockOffset === 0) {
-        newGrid[y].push(0);
+        mapGen[y][x] = 2;
         rockOffset = floor(random(rows, rows * 3));
         rocksOnMap++;
       }
-      else if (random(100) < 15 || canWater && random(100) < 75) {
-        newGrid[y].push(1);
+      else if (waterOnMap < 50 && (random(100) < 15 || canWater && random(100) < 75)) {
+        mapGen[y][x] = 1;
+        if (rockOffset > 0) {
+          rockOffset--;
+        }
+        waterOnMap++;
       }
       else {
-        newGrid[y].push(2);
+        mapGen[y][x] = 0;
         if (rockOffset > 0) {
           rockOffset--;
         }
       }
 
-      if (newGrid[y][x - 1] === 1 || newGrid[y - 1][x] === 1) {
-        canWater = true;
-      }
-      else {
-        canWater = false;
+      //look at every neighbour
+      for (let i = -1; i <= 1; i++) {
+        for (let j = -1; j <= 1; j++) {
+          //don't fall off the edge
+          if (x+j >= 0 && x+j < cols && y+i >= 0 && y+i < rows) {
+            if (mapGen[y+i][x+j] === 1) {
+              canWater = true;
+            }
+            else {
+              canWater = false;
+            }
+          }
+        }
       }
       
     }
   }
-  return newGrid;
+  return mapGen;
 
+}
+
+function generateEmptyField(cols, rows) {
+  let newGrid = [];
+  for (let y = 0; y < rows; y++) {
+    newGrid.push([]);
+    for (let x = 0; x < cols; x++) {
+      newGrid[y].push(0);
+    }
+  }
+  return newGrid;
 }
 
 function keyPressed() {
@@ -92,8 +115,8 @@ function keyPressed() {
   if (key === "r") {
     grid = generateRandomTerrain(cols, rows);
   }
-  // else if (key === "e") {
-  //   grid = generateEmptyGrid(cols, rows);
-  // }
+  else if (key === "e") {
+    grid = generateEmptyGrid(cols, rows);
+  }
 
 }
