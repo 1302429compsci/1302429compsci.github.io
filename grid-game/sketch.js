@@ -18,7 +18,6 @@ async function setup() {
 
 }
 
-
 function draw() {
 
   background(220);
@@ -128,13 +127,12 @@ function keyPressed() {
 
 }
 
-function mousePressed(event) {
+function mousePressed() {
   let x = Math.floor(mouseX/cellSize);
   let y = Math.floor(mouseY/cellSize);
 
   //self
   toggleCell(x, y);
-  recentClick = event.button;
 }
 
 function toggleCell(x, y) {
@@ -148,7 +146,7 @@ function toggleCell(x, y) {
         grid[y][x] = 0;
       }
     }
-    else if (mouseButton === RIGHT) {
+    else if (mouseButton === MIDDLE) {
       if (grid[y][x] > 0) {
         grid[y][x]--;
       }
