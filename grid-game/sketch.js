@@ -13,12 +13,16 @@ let cols = 21;
 let rows = 21;
 let grid;
 let cellSize;
+let grassImg;
+let waterImg;
 
 async function setup() {
 
   createCanvas(windowWidth, windowHeight);
   grid = generateRandomTerrain(cols, rows);
   cellSize = Math.min(width, height) / cols;
+  grassImg = await loadImage("grass.png");
+  waterImg = await loadImage("water.png");
 
 }
 
@@ -34,15 +38,16 @@ function displayGrid() {
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
       if (grid[y][x] === GRASS_TILE) {
-        fill("lightgreen");
+        // fill("lightgreen");
+        image(grassImg, x * cellSize, y * cellSize, cellSize, cellSize);
       }
       else if (grid[y][x] === WATER_TILE) {
-        fill("lightblue");
+        image(waterImg, x * cellSize, y * cellSize, cellSize, cellSize);
       }
       else if (grid[y][x] === ROCK_TILE) {
         fill("grey");
+        square(x * cellSize, y * cellSize, cellSize);
       }
-      square(x * cellSize, y * cellSize, cellSize);
     }
   }
 
