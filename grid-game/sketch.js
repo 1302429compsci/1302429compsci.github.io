@@ -15,6 +15,7 @@ let grid;
 let cellSize;
 let grassImg;
 let waterImg;
+let rockImg;
 
 async function setup() {
 
@@ -23,6 +24,7 @@ async function setup() {
   cellSize = Math.min(width, height) / cols;
   grassImg = await loadImage("grass.png");
   waterImg = await loadImage("water.png");
+  rockImg = await loadImage("rock.png");
 
 }
 
@@ -42,11 +44,14 @@ function displayGrid() {
         image(grassImg, x * cellSize, y * cellSize, cellSize, cellSize);
       }
       else if (grid[y][x] === WATER_TILE) {
+        image(grassImg, x * cellSize, y * cellSize, cellSize, cellSize);
         image(waterImg, x * cellSize, y * cellSize, cellSize, cellSize);
       }
       else if (grid[y][x] === ROCK_TILE) {
-        fill("grey");
-        square(x * cellSize, y * cellSize, cellSize);
+        image(grassImg, x * cellSize, y * cellSize, cellSize, cellSize);
+        image(rockImg, x * cellSize, y * cellSize, cellSize, cellSize);
+        // fill("grey");
+        // square(x * cellSize, y * cellSize, cellSize);
       }
     }
   }
