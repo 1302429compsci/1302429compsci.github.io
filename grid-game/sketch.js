@@ -5,6 +5,8 @@
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
+const VERY_HIGH_NUMBER = 2**52;
+
 const GRASS_TILE = 0;
 const WATER_TILE = 1;
 const ROCK_TILE = 2;
@@ -18,6 +20,8 @@ let grassImg;
 let waterImg;
 let rockImg;
 let playWizImg;
+
+let prevTile;
 
 async function setup() {
 
@@ -67,10 +71,13 @@ function generateRandomTerrain(cols, rows) {
   let canBoulder;
   let rocksOnMap = 0;
   let rockOffset = 0;
+  let rockStartOffset = floor(random(0, rows * 4));
+  let boulderChance = 100;
 
   let canWater;
   let waterOnMap = 0;
-  let waterOffset = floor(random(0, rows * 4));
+  let waterStartOffset = floor(random(0, rows * 4));
+  let lakeChance = 100;
 
   for (let y = 0; y < rows; y++) {
 
@@ -81,12 +88,12 @@ function generateRandomTerrain(cols, rows) {
         for (let j = -1; j <= 1; j++) {
           //don't fall off the edge
           if (x+j >= 0 && x+j < cols && y+i >= 0 && y+i < rows) {
-            if (mapGen[y+i][x+j] === 1) {
-              canWater = true;
+            if (mapGen[y+i][x+j] === 2) {
+              canBoulder = true;
               break;
             }
-            else if (mapGen[y+i][x+j] === 2) {
-              canBoulder = true;
+            else if (mapGen[y+i][x+j] === 1) {
+              canWater = true;
               break;
             }
             else {
@@ -97,29 +104,39 @@ function generateRandomTerrain(cols, rows) {
         }
       }
 
-      if (random(100) < 10 && rocksOnMap < 25 && rockOffset === 0 || random(100) < 50 && canBoulder && rocksOnMap < 25 && rockOffset < rows * 1.75) {
+      if (rockStartOffset === 0 && (random(100) < 10 && rocksOnMap < 25 && rockOffset === 0 || random(100) <= boulderChance && canBoulder && rocksOnMap < 25)) {
         mapGen[y][x] = ROCK_TILE;
-        rockOffset = floor(random(0, rows * 2));
+        // rockOffset = floor(random(0, rows * 2));
         rocksOnMap++;
-        if (waterOffset > 0) {
-          waterOffset--;
+        if (waterStartOffset > 0) {
+          waterStartOffset--;
         }
+        lakeChance += floor(random(-5, 5));
       }
-      else if (waterOffset === 0 && (waterOnMap < 50 && (random(100) < 15 || canWater && random(100) < 90))) {
+      else if (waterStartOffset === 0 && waterOnMap < 50 && (random(100) < 15 || canWater && random(100) <= lakeChance)) {
         mapGen[y][x] = WATER_TILE;
         if (rockOffset > 0) {
           rockOffset--;
         }
+        if (rockStartOffset > 0) {
+          rockStartOffset--;
+        }
         waterOnMap++;
+        boulderChance += floor(random(-5, 5));
       }
       else {
         mapGen[y][x] = GRASS_TILE;
         if (rockOffset > 0) {
           rockOffset--;
         }
-        if (waterOffset > 0) {
-          waterOffset--;
+        if (waterStartOffset > 0) {
+          waterStartOffset--;
         }
+        if (rockStartOffset > 0) {
+          rockStartOffset--;
+        }
+        boulderChance += floor(random(-5, 5));
+        lakeChance += floor(random(-5, 5));
       }
       
     }
