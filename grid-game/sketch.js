@@ -8,6 +8,7 @@
 const GRASS_TILE = 0;
 const WATER_TILE = 1;
 const ROCK_TILE = 2;
+const PLAYER_ON_TILE = 99;
 
 let cols = 21;
 let rows = 21;
@@ -16,6 +17,7 @@ let cellSize;
 let grassImg;
 let waterImg;
 let rockImg;
+let playWizImg;
 
 async function setup() {
 
@@ -25,6 +27,7 @@ async function setup() {
   grassImg = await loadImage("grass.png");
   waterImg = await loadImage("water.png");
   rockImg = await loadImage("rock.png");
+  playWizImg = await loadImage("wizard.png");
 
 }
 
@@ -40,7 +43,6 @@ function displayGrid() {
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
       if (grid[y][x] === GRASS_TILE) {
-        // fill("lightgreen");
         image(grassImg, x * cellSize, y * cellSize, cellSize, cellSize);
       }
       else if (grid[y][x] === WATER_TILE) {
@@ -68,29 +70,11 @@ function generateRandomTerrain(cols, rows) {
 
   let canWater;
   let waterOnMap = 0;
+  let waterOffset = floor(random(0, rows * 4));
 
   for (let y = 0; y < rows; y++) {
 
     for (let x = 0; x < cols; x++) {
-
-      if (random(100) < 10 && rocksOnMap < 25 && rockOffset === 0 || random(100) < 50 && canBoulder && rocksOnMap < 25 && rockOffset < rows * 1.75) {
-        mapGen[y][x] = ROCK_TILE;
-        rockOffset = floor(random(0, rows * 2));
-        rocksOnMap++;
-      }
-      else if (waterOnMap < 50 && (random(100) < 15 || canWater && random(100) < 90)) {
-        mapGen[y][x] = WATER_TILE;
-        if (rockOffset > 0) {
-          rockOffset--;
-        }
-        waterOnMap++;
-      }
-      else {
-        mapGen[y][x] = GRASS_TILE;
-        if (rockOffset > 0) {
-          rockOffset--;
-        }
-      }
 
       //look at every neighbour
       for (let i = -1; i <= 1; i++) {
@@ -110,6 +94,31 @@ function generateRandomTerrain(cols, rows) {
               canBoulder = false;
             }
           }
+        }
+      }
+
+      if (random(100) < 10 && rocksOnMap < 25 && rockOffset === 0 || random(100) < 50 && canBoulder && rocksOnMap < 25 && rockOffset < rows * 1.75) {
+        mapGen[y][x] = ROCK_TILE;
+        rockOffset = floor(random(0, rows * 2));
+        rocksOnMap++;
+        if (waterOffset > 0) {
+          waterOffset--;
+        }
+      }
+      else if (waterOffset === 0 && (waterOnMap < 50 && (random(100) < 15 || canWater && random(100) < 90))) {
+        mapGen[y][x] = WATER_TILE;
+        if (rockOffset > 0) {
+          rockOffset--;
+        }
+        waterOnMap++;
+      }
+      else {
+        mapGen[y][x] = GRASS_TILE;
+        if (rockOffset > 0) {
+          rockOffset--;
+        }
+        if (waterOffset > 0) {
+          waterOffset--;
         }
       }
       
