@@ -31,6 +31,7 @@ let waterImg;
 let rockImg;
 let playWizImg;
 
+let playerChar;
 let prevTile;
 
 async function setup() {
@@ -43,6 +44,9 @@ async function setup() {
   waterImg = await loadImage("water.png");
   rockImg = await loadImage("rock.png");
   playWizImg = await loadImage("wizard.png");
+
+  playerChar = new Player(10, 19);
+  playerChar.spawn();
 
 }
 
@@ -92,6 +96,14 @@ function displayGrid() {
         // fill("grey");
         // square(x * cellSize, y * cellSize, cellSize);
       }
+      else if (grid[y][x] === PLAYER_ON_TILE && prevTile === GRASS_TILE) {
+        image(grassImg, x * cellSize, y * cellSize, cellSize, cellSize);
+        image(playWizImg, x * cellSize, y * cellSize, cellSize, cellSize);
+      }
+      else if (grid[y][x] === PLAYER_ON_TILE && prevTile === WATER_TILE) {
+        image(waterImg, x * cellSize, y * cellSize, cellSize, cellSize);
+        image(playWizImg, x * cellSize, y * cellSize, cellSize, cellSize);
+      }
     }
   }
 
@@ -104,10 +116,10 @@ function displayTitleScreen() {
   textSize(100);
   text("AN OKAY GRID GAME", windowWidth/2, windowHeight/10);
   textSize(40);
-  text("BY SOMEONE NOT MAKING ANOTHER PLATFORMER (FOR NOW)", windowWidth/2, windowHeight/5)
+  text("BY SOMEONE NOT MAKING ANOTHER PLATFORMER (FOR NOW)", windowWidth/2, windowHeight/5);
   textSize(55);
   text("PRESS ANY MOUSE BUTTON TO BEGIN", windowWidth/2, windowHeight/1.2);
-  image(playWizImg, windowWidth/2, windowHeight/2, windowWidth/5, windowHeight/5)
+  image(playWizImg, windowWidth/2, windowHeight/2, windowWidth/5, windowHeight/5);
 
 }
 
@@ -192,6 +204,7 @@ function generateRandomTerrain(cols, rows) {
       
     }
   }
+  
   return mapGen;
 
 }
@@ -267,5 +280,30 @@ function shiftBackgroundColor() {
   backgroundRed += random(-2, 2);
   backgroundGreen += random(-2, 2);
   backgroundBlue += random(-2, 2);
+
+}
+
+// PLAYER CLASS
+// PLAYER CLASS
+// PLAYER CLASS
+class Player {
+
+  constructor(playX, playY) {
+    this.playX = playX;
+    this.playY = playY;
+  }
+
+  move(x, y) {
+    if (x >= 0 && x < cols && y >= 0 && y < rows && grid[y][x] !== ROCK_TILE) {
+      grid[this.playX][this.playY] = prevTile;
+      this.playX = x;
+      this.playY = y;
+    }
+  }
+
+  spawn() {
+    prevTile = grid[this.playX][this.playY];
+    grid[this.playX][this.playY] = PLAYER_ON_TILE;
+  }
 
 }
