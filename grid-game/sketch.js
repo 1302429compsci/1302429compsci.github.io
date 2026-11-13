@@ -1,6 +1,6 @@
-// Project Title
-// Your Name
-// Date
+// Random Grid Generation
+// Matthew Laskowski
+// November ??, 2026
 //
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
@@ -12,10 +12,20 @@ const WATER_TILE = 1;
 const ROCK_TILE = 2;
 const PLAYER_ON_TILE = 99;
 
+const TITLE_SCREEN = "title screen";
+const SELECT_SCREEN = "select screen";
+const PLAYING_GAME = "playing game";
+const GAME_OVER = "game over";
+
 let cols = 21;
 let rows = 21;
 let grid;
 let cellSize;
+let gameState = TITLE_SCREEN;
+let backgroundRed = 150;
+let backgroundGreen = 150;
+let backgroundBlue = 150;
+
 let grassImg;
 let waterImg;
 let rockImg;
@@ -26,6 +36,7 @@ let prevTile;
 async function setup() {
 
   createCanvas(windowWidth, windowHeight);
+  textAlign(CENTER, CENTER);
   grid = generateRandomTerrain(cols, rows);
   cellSize = Math.min(width, height) / cols;
   grassImg = await loadImage("grass.png");
@@ -35,15 +46,37 @@ async function setup() {
 
 }
 
+// DRAW LOOP
+// DRAW LOOP
+// DRAW LOOP
+
 function draw() {
 
-  background(220);
-  displayGrid();
+  displayGameState();
+
+}
+
+// DISPLAY FUNCTIONS
+// DISPLAY FUNCTIONS
+// DISPLAY FUNCTIONS
+
+function displayGameState() {
+
+  if (gameState === TITLE_SCREEN) {
+    background(backgroundRed, backgroundGreen, backgroundBlue);
+    shiftBackgroundColor();
+    displayTitleScreen();
+  }
+  else if (gameState === PLAYING_GAME) {
+    background(100, 150, 0);
+    displayGrid();
+  }
 
 }
 
 function displayGrid() {
 
+  imageMode(CORNER);
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
       if (grid[y][x] === GRASS_TILE) {
@@ -63,6 +96,24 @@ function displayGrid() {
   }
 
 }
+
+function displayTitleScreen() {
+
+  imageMode(CENTER);
+
+  textSize(100);
+  text("AN OKAY GRID GAME", windowWidth/2, windowHeight/10);
+  textSize(40);
+  text("BY SOMEONE NOT MAKING ANOTHER PLATFORMER (FOR NOW)", windowWidth/2, windowHeight/5)
+  textSize(55);
+  text("PRESS ANY MOUSE BUTTON TO BEGIN", windowWidth/2, windowHeight/1.2);
+  image(playWizImg, windowWidth/2, windowHeight/2, windowWidth/5, windowHeight/5)
+
+}
+
+// GRID GENERATION
+// GRID GENERATION
+// GRID GENERATION
 
 function generateRandomTerrain(cols, rows) {
 
@@ -156,6 +207,10 @@ function generateEmptyField(cols, rows) {
   return newGrid;
 }
 
+// SOMETHING WAS PRESSED FUNCTIONS
+// SOMETHING WAS PRESSED FUNCTIONS
+// SOMETHING WAS PRESSED FUNCTIONS
+
 function keyPressed() {
 
   if (key === "r") {
@@ -168,12 +223,21 @@ function keyPressed() {
 }
 
 function mousePressed() {
-  let x = Math.floor(mouseX/cellSize);
-  let y = Math.floor(mouseY/cellSize);
-
-  //self
-  toggleCell(x, y);
+  if (gameState === TITLE_SCREEN) {
+    gameState = PLAYING_GAME;
+  }
+  else if (gameState === PLAYING_GAME) {
+    let x = Math.floor(mouseX/cellSize);
+    let y = Math.floor(mouseY/cellSize);
+  
+    //self
+    toggleCell(x, y);
+  }
 }
+
+// CHANGE SOMETHING FUNCTIONS
+// CHANGE SOMETHING FUNCTIONS
+// CHANGE SOMETHING FUNCTIONS
 
 function toggleCell(x, y) {
   //make sure you're in the grid
@@ -195,5 +259,13 @@ function toggleCell(x, y) {
       }
     }
   }
+
+}
+
+function shiftBackgroundColor() {
+
+  backgroundRed += random(-2, 2);
+  backgroundGreen += random(-2, 2);
+  backgroundBlue += random(-2, 2);
 
 }
