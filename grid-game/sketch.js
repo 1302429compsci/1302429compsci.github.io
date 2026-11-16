@@ -36,7 +36,8 @@ let prevTile;
 
 async function setup() {
 
-  createCanvas(windowWidth, windowHeight);
+  let canvas = createCanvas(windowWidth, windowHeight);
+  canvas.parent("canvas-container");
   textAlign(CENTER, CENTER);
   grid = generateRandomTerrain(cols, rows);
   cellSize = Math.min(width, height) / cols;
@@ -226,6 +227,19 @@ function generateEmptyField(cols, rows) {
 
 function keyPressed() {
 
+  if (key === "w") {
+    playerChar.move(playerChar.playX, playerChar.playY - 1);
+  }
+  if (key === "a") {
+    playerChar.move(playerChar.playX - 1, playerChar.playY);
+  }
+  if (key === "s") {
+    playerChar.move(playerChar.playX, playerChar.playY + 1);
+  }
+  if (key === "d") {
+    playerChar.move(playerChar.playX + 1, playerChar.playY);
+  }
+
   if (key === "r") {
     grid = generateRandomTerrain(cols, rows);
   }
@@ -254,9 +268,9 @@ function mousePressed() {
 
 function toggleCell(x, y) {
   //make sure you're in the grid
-  if (x >= 0 && x < cols && y >= 0 && y < rows) {
+  if (x >= 0 && x < cols && y >= 0 && y < rows && grid[y][x] !== PLAYER_ON_TILE) {
     if (mouseButton.left) {
-      if (grid[y][x] < 2) {
+      if (grid[y][x] < ROCK_TILE) {
         grid[y][x]++;
       }
       else {
@@ -264,7 +278,7 @@ function toggleCell(x, y) {
       }
     }
     else if (mouseButton.center) {
-      if (grid[y][x] > 0) {
+      if (grid[y][x] > GRASS_TILE) {
         grid[y][x]--;
       }
       else {
@@ -295,15 +309,19 @@ class Player {
 
   move(x, y) {
     if (x >= 0 && x < cols && y >= 0 && y < rows && grid[y][x] !== ROCK_TILE) {
-      grid[this.playX][this.playY] = prevTile;
+      grid[this.playY][this.playX] = prevTile;
+      console.log(prevTile);
       this.playX = x;
       this.playY = y;
+      prevTile = grid[y][x];
+      grid[this.playY][this.playX] = PLAYER_ON_TILE;
+      console.log(prevTile);
     }
   }
 
   spawn() {
-    prevTile = grid[this.playX][this.playY];
-    grid[this.playX][this.playY] = PLAYER_ON_TILE;
+    prevTile = grid[this.playY][this.playX];
+    grid[this.playY][this.playX] = PLAYER_ON_TILE;
   }
 
 }
