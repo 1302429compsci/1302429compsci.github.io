@@ -32,6 +32,8 @@ let rockImg;
 let playWizImg;
 
 let playerChar;
+let playerCanMove = true;
+
 let prevTile;
 
 async function setup() {
@@ -227,24 +229,26 @@ function generateEmptyField(cols, rows) {
 
 function keyPressed() {
 
-  if (key === "w") {
-    playerChar.move(playerChar.playX, playerChar.playY - 1);
-  }
-  if (key === "a") {
-    playerChar.move(playerChar.playX - 1, playerChar.playY);
-  }
-  if (key === "s") {
-    playerChar.move(playerChar.playX, playerChar.playY + 1);
-  }
-  if (key === "d") {
-    playerChar.move(playerChar.playX + 1, playerChar.playY);
-  }
-
-  if (key === "r") {
-    grid = generateRandomTerrain(cols, rows);
-  }
-  else if (key === "e") {
-    grid = generateEmptyField(cols, rows);
+  if (gameState === PLAYING_GAME) {
+    if (key === "w") {
+      playerChar.move(playerChar.playX, playerChar.playY - 1);
+    }
+    if (key === "a") {
+      playerChar.move(playerChar.playX - 1, playerChar.playY);
+    }
+    if (key === "s") {
+      playerChar.move(playerChar.playX, playerChar.playY + 1);
+    }
+    if (key === "d") {
+      playerChar.move(playerChar.playX + 1, playerChar.playY);
+    }
+  
+    if (key === "r") {
+      grid = generateRandomTerrain(cols, rows);
+    }
+    else if (key === "e") {
+      grid = generateEmptyField(cols, rows);
+    }
   }
 
 }
@@ -308,20 +312,27 @@ class Player {
   }
 
   move(x, y) {
-    if (x >= 0 && x < cols && y >= 0 && y < rows && grid[y][x] !== ROCK_TILE) {
+
+    if (x >= 0 && x < cols && y >= 0 && y < rows && grid[y][x] !== ROCK_TILE && playerCanMove) {
       grid[this.playY][this.playX] = prevTile;
       console.log(prevTile);
       this.playX = x;
       this.playY = y;
       prevTile = grid[y][x];
       grid[this.playY][this.playX] = PLAYER_ON_TILE;
-      console.log(prevTile);
+      this.playerMoveToggle();
+      console.log(playerCanMove);
+      window.setTimeout(this.playerMoveToggle, 1000);
     }
   }
 
   spawn() {
     prevTile = grid[this.playY][this.playX];
     grid[this.playY][this.playX] = PLAYER_ON_TILE;
+  }
+
+  playerMoveToggle() {
+    playerCanMove = !playerCanMove;
   }
 
 }
