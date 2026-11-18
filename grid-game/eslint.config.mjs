@@ -862,7 +862,7 @@ export default [
       },
     },
     rules: {
-      indent: ["warn", 2],
+      indent: ["warn", 2, {SwitchCase: 1}],
       semi: ["warn", "always"],
       "no-extra-parens": ["warn", "all"],
       curly: ["warn", "all"],

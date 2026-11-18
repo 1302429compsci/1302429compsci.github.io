@@ -11,6 +11,7 @@ const GRASS_TILE = 0;
 const WATER_TILE = 1;
 const ROCK_TILE = 2;
 const FIRE_TILE = 3;
+const SPARK_TILE = 4;
 const PLAYER_ON_TILE = 99;
 
 const TITLE_SCREEN = "title screen";
@@ -32,9 +33,11 @@ let waterImg;
 let rockImg;
 let fireImg;
 let playWizImg;
+let targetImg;
 
 let playerChar;
 let playerCanMove = true;
+let playerAnIdiot = false;
 let spellTarget = {x: undefined, y: undefined};
 
 let prevTile;
@@ -51,6 +54,7 @@ async function setup() {
   rockImg = await loadImage("rock.png");
   fireImg = await loadImage("fire.png");
   playWizImg = await loadImage("wizard.png");
+  targetImg = await loadImage("target.png");
 
   playerChar = new Player(10, 19, 500);
   playerChar.spawn();
@@ -81,6 +85,18 @@ function displayGameState() {
   else if (gameState === PLAYING_GAME) {
     background(100, 150, 0);
     displayGrid();
+  }
+  else if (gameState === GAME_OVER) {
+    if (playerAnIdiot) {
+      textSize(150);
+      text("GAME OVER", windowWidth/2, windowHeight/8);
+      textSize(50);
+      text("Do tell, why did you think THAT was a good idea?", windowWidth/2, windowHeight/2);
+    }
+    else {
+      textSize(150);
+      text("GAME OVER", windowWidth/2, windowHeight/2);
+    }
   }
 
 }
@@ -119,7 +135,10 @@ function displayGrid() {
         image(grassImg, x * cellSize, y * cellSize, cellSize, cellSize);
         image(playWizImg, x * cellSize, y * cellSize, cellSize, cellSize);
         image(fireImg, x * cellSize, y * cellSize, cellSize, cellSize);
-        
+      }
+
+      if (spellTarget.x !== undefined && y === spellTarget.y && x === spellTarget.x) {
+        image(targetImg, x * cellSize, y * cellSize, cellSize, cellSize);
       }
     }
   }
@@ -288,8 +307,9 @@ function mousePressed() {
       spellTarget.x = Math.floor(mouseX/cellSize);
       spellTarget.y = Math.floor(mouseY/cellSize);
     }
-    else {
-      playerChar.castSpell("Fireball");
+    else if (mouseButton.center) {
+      let spellCast = prompt("Bippity Boppity you cast:");
+      playerChar.castSpell(spellCast);
     }
   }
 }
@@ -365,21 +385,35 @@ class Player {
   }
 
   castSpell(spell) {
-    switch (spell) {
-      case "Fireball":
-      case "fireball":
-        for (let i = -1; i <= 1; i++) {
-          for (let j = -1; j <= 1; j++) {
-            if (grid[spellTarget.y+i][spellTarget.x+j] === GRASS_TILE) {
-              grid[spellTarget.y+i][spellTarget.x+j] = FIRE_TILE;
-            }
-            else if (grid[spellTarget.y+i][spellTarget.x+j] === WATER_TILE) {
-              grid[spellTarget.y+i][spellTarget.x+j] = GRASS_TILE;
+    if (spellTarget.y && spellTarget.x) {
+      switch (spell.toLowerCase()) {
+        // case "Fireball":
+        case "destroy":
+          if (grid[spellTarget.y][spellTarget.x] !== GRASS_TILE) {
+            grid[spellTarget.y][spellTarget.x] = GRASS_TILE;
+          }
+          break;
+        case "die":
+          if (grid[spellTarget.y][spellTarget.x] === PLAYER_ON_TILE) {
+            playerAnIdiot = true;
+            gameState = GAME_OVER;
+          }
+          break;
+        case "fireball":
+          for (let i = -1; i <= 1; i++) {
+            for (let j = -1; j <= 1; j++) {
+              if (grid[spellTarget.y+i][spellTarget.x+j] === GRASS_TILE) {
+                grid[spellTarget.y+i][spellTarget.x+j] = FIRE_TILE;
+              }
+              else if (grid[spellTarget.y+i][spellTarget.x+j] === WATER_TILE) {
+                grid[spellTarget.y+i][spellTarget.x+j] = GRASS_TILE;
+              }
             }
           }
-        }
-      // case "Destroy"
-      // case "destroy"
+          break;
+        case "lightning":
+  
+      }
     }
   }
 
