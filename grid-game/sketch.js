@@ -10,6 +10,7 @@ const VERY_HIGH_NUMBER = 2**52;
 const GRASS_TILE = 0;
 const WATER_TILE = 1;
 const ROCK_TILE = 2;
+const FIRE_TILE = 3;
 const PLAYER_ON_TILE = 99;
 
 const TITLE_SCREEN = "title screen";
@@ -29,10 +30,12 @@ let backgroundBlue = 150;
 let grassImg;
 let waterImg;
 let rockImg;
+let fireImg;
 let playWizImg;
 
 let playerChar;
 let playerCanMove = true;
+let spellTarget = {x: undefined, y: undefined};
 
 let prevTile;
 
@@ -46,9 +49,10 @@ async function setup() {
   grassImg = await loadImage("grass.png");
   waterImg = await loadImage("water.png");
   rockImg = await loadImage("rock.png");
+  fireImg = await loadImage("fire.png");
   playWizImg = await loadImage("wizard.png");
 
-  playerChar = new Player(10, 19);
+  playerChar = new Player(10, 19, 500);
   playerChar.spawn();
 
 }
@@ -99,6 +103,10 @@ function displayGrid() {
         // fill("grey");
         // square(x * cellSize, y * cellSize, cellSize);
       }
+      else if (grid[y][x] === FIRE_TILE) {
+        image(grassImg, x * cellSize, y * cellSize, cellSize, cellSize);
+        image(fireImg, x * cellSize, y * cellSize, cellSize, cellSize);
+      }
       else if (grid[y][x] === PLAYER_ON_TILE && prevTile === GRASS_TILE) {
         image(grassImg, x * cellSize, y * cellSize, cellSize, cellSize);
         image(playWizImg, x * cellSize, y * cellSize, cellSize, cellSize);
@@ -106,6 +114,12 @@ function displayGrid() {
       else if (grid[y][x] === PLAYER_ON_TILE && prevTile === WATER_TILE) {
         image(waterImg, x * cellSize, y * cellSize, cellSize, cellSize);
         image(playWizImg, x * cellSize, y * cellSize, cellSize, cellSize);
+      }
+      else if (grid[y][x] === PLAYER_ON_TILE && prevTile === FIRE_TILE) {
+        image(grassImg, x * cellSize, y * cellSize, cellSize, cellSize);
+        image(playWizImg, x * cellSize, y * cellSize, cellSize, cellSize);
+        image(fireImg, x * cellSize, y * cellSize, cellSize, cellSize);
+        
       }
     }
   }
@@ -154,11 +168,11 @@ function generateRandomTerrain(cols, rows) {
         for (let j = -1; j <= 1; j++) {
           //don't fall off the edge
           if (x+j >= 0 && x+j < cols && y+i >= 0 && y+i < rows) {
-            if (mapGen[y+i][x+j] === 2) {
+            if (mapGen[y+i][x+j] === ROCK_TILE) {
               canBoulder = true;
               break;
             }
-            else if (mapGen[y+i][x+j] === 1) {
+            else if (mapGen[y+i][x+j] === WATER_TILE) {
               canWater = true;
               break;
             }
@@ -230,16 +244,28 @@ function generateEmptyField(cols, rows) {
 function keyPressed() {
 
   if (gameState === PLAYING_GAME) {
-    if (key === "w") {
+    if (keyIsDown("w") && keyIsDown("d")) {
+      playerChar.move(playerChar.playX + 1, playerChar.playY - 1);
+    }
+    if (keyIsDown("a") && keyIsDown("w")) {
+      playerChar.move(playerChar.playX - 1, playerChar.playY - 1);
+    }
+    if (keyIsDown("s") && keyIsDown("a")) {
+      playerChar.move(playerChar.playX - 1, playerChar.playY + 1);
+    }
+    if (keyIsDown("d") && keyIsDown("s")) {
+      playerChar.move(playerChar.playX + 1, playerChar.playY + 1);
+    }
+    if (keyIsDown("w")) {
       playerChar.move(playerChar.playX, playerChar.playY - 1);
     }
-    if (key === "a") {
+    if (keyIsDown("a")) {
       playerChar.move(playerChar.playX - 1, playerChar.playY);
     }
-    if (key === "s") {
+    if (keyIsDown("s")) {
       playerChar.move(playerChar.playX, playerChar.playY + 1);
     }
-    if (key === "d") {
+    if (keyIsDown("d")) {
       playerChar.move(playerChar.playX + 1, playerChar.playY);
     }
   
@@ -258,40 +284,42 @@ function mousePressed() {
     gameState = PLAYING_GAME;
   }
   else if (gameState === PLAYING_GAME) {
-    let x = Math.floor(mouseX/cellSize);
-    let y = Math.floor(mouseY/cellSize);
-  
-    //self
-    toggleCell(x, y);
-  }
-}
-
-// CHANGE SOMETHING FUNCTIONS
-// CHANGE SOMETHING FUNCTIONS
-// CHANGE SOMETHING FUNCTIONS
-
-function toggleCell(x, y) {
-  //make sure you're in the grid
-  if (x >= 0 && x < cols && y >= 0 && y < rows && grid[y][x] !== PLAYER_ON_TILE) {
     if (mouseButton.left) {
-      if (grid[y][x] < ROCK_TILE) {
-        grid[y][x]++;
-      }
-      else {
-        grid[y][x] = GRASS_TILE;
-      }
+      spellTarget.x = Math.floor(mouseX/cellSize);
+      spellTarget.y = Math.floor(mouseY/cellSize);
     }
-    else if (mouseButton.center) {
-      if (grid[y][x] > GRASS_TILE) {
-        grid[y][x]--;
-      }
-      else {
-        grid[y][x] = ROCK_TILE;
-      }
+    else {
+      playerChar.castSpell("Fireball");
     }
   }
-
 }
+
+// CHANGE SOMETHING FUNCTIONS
+// CHANGE SOMETHING FUNCTIONS
+// CHANGE SOMETHING FUNCTIONS
+
+// function toggleCell(x, y) {
+//   //make sure you're in the grid
+//   if (x >= 0 && x < cols && y >= 0 && y < rows && grid[y][x] !== PLAYER_ON_TILE) {
+//     if (mouseButton.left) {
+//       if (grid[y][x] < ROCK_TILE) {
+//         grid[y][x]++;
+//       }
+//       else {
+//         grid[y][x] = GRASS_TILE;
+//       }
+//     }
+//     else if (mouseButton.center) {
+//       if (grid[y][x] > GRASS_TILE) {
+//         grid[y][x]--;
+//       }
+//       else {
+//         grid[y][x] = ROCK_TILE;
+//       }
+//     }
+//   }
+
+// }
 
 function shiftBackgroundColor() {
 
@@ -306,9 +334,10 @@ function shiftBackgroundColor() {
 // PLAYER CLASS
 class Player {
 
-  constructor(playX, playY) {
+  constructor(playX, playY, playSpeed) {
     this.playX = playX;
     this.playY = playY;
+    this.playSpeed = playSpeed;
   }
 
   move(x, y) {
@@ -322,7 +351,7 @@ class Player {
       grid[this.playY][this.playX] = PLAYER_ON_TILE;
       this.playerMoveToggle();
       console.log(playerCanMove);
-      window.setTimeout(this.playerMoveToggle, 1000);
+      window.setTimeout(this.playerMoveToggle, this.playSpeed);
     }
   }
 
@@ -335,4 +364,23 @@ class Player {
     playerCanMove = !playerCanMove;
   }
 
-}
+  castSpell(spell) {
+    switch (spell) {
+      case "Fireball":
+      case "fireball":
+        for (let i = -1; i <= 1; i++) {
+          for (let j = -1; j <= 1; j++) {
+            if (grid[spellTarget.y+i][spellTarget.x+j] === GRASS_TILE) {
+              grid[spellTarget.y+i][spellTarget.x+j] = FIRE_TILE;
+            }
+            else if (grid[spellTarget.y+i][spellTarget.x+j] === WATER_TILE) {
+              grid[spellTarget.y+i][spellTarget.x+j] = GRASS_TILE;
+            }
+          }
+        }
+      // case "Destroy"
+      // case "destroy"
+    }
+  }
+
+} // End Player Class
