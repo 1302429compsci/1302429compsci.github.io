@@ -406,6 +406,7 @@ class Player {
           else if (grid[spellTarget.y][spellTarget.x] === PLAYER_ON_TILE && prevTile === WATER_TILE) {
             prevTile = GRASS_TILE;
           }
+          break;
         case "destroy":
           if (grid[spellTarget.y][spellTarget.x] === WET_ROCK_TILE) {
             grid[spellTarget.y][spellTarget.x] = WATER_TILE;
@@ -459,6 +460,7 @@ class Player {
               }
             }
           }
+          break;
         case "hydrate":
         case "water":
           if (grid[spellTarget.y][spellTarget.x] === ROCK_TILE) {
