@@ -10,8 +10,8 @@ const VERY_HIGH_NUMBER = 2**52;
 const GRASS_TILE = 0;
 const WATER_TILE = 1;
 const ROCK_TILE = 2;
-const FIRE_TILE = 3;
-const SPARK_TILE = 4;
+const WET_ROCK_TILE = 3;
+const FIRE_TILE = 4;
 const PLAYER_ON_TILE = 99;
 
 const TITLE_SCREEN = "title screen";
@@ -115,6 +115,13 @@ function displayGrid() {
       }
       else if (grid[y][x] === ROCK_TILE) {
         image(grassImg, x * cellSize, y * cellSize, cellSize, cellSize);
+        image(rockImg, x * cellSize, y * cellSize, cellSize, cellSize);
+        // fill("grey");
+        // square(x * cellSize, y * cellSize, cellSize);
+      }
+      else if (grid[y][x] === WET_ROCK_TILE) {
+        image(grassImg, x * cellSize, y * cellSize, cellSize, cellSize);
+        image(waterImg, x * cellSize, y * cellSize, cellSize, cellSize);
         image(rockImg, x * cellSize, y * cellSize, cellSize, cellSize);
         // fill("grey");
         // square(x * cellSize, y * cellSize, cellSize);
@@ -388,8 +395,26 @@ class Player {
     if (spellTarget.y && spellTarget.x) {
       switch (spell.toLowerCase()) {
         // case "Fireball":
+        case "dehydrate":
+        case "drink":
+          if (grid[spellTarget.y][spellTarget.x] === WET_ROCK_TILE) {
+            grid[spellTarget.y][spellTarget.x] = ROCK_TILE;
+          }
+          else if (grid[spellTarget.y][spellTarget.x] === WATER_TILE) {
+            grid[spellTarget.y][spellTarget.x] = GRASS_TILE;
+          }
+          else if (grid[spellTarget.y][spellTarget.x] === PLAYER_ON_TILE && prevTile === WATER_TILE) {
+            prevTile = GRASS_TILE;
+          }
         case "destroy":
-          if (grid[spellTarget.y][spellTarget.x] !== GRASS_TILE) {
+          if (grid[spellTarget.y][spellTarget.x] === WET_ROCK_TILE) {
+            grid[spellTarget.y][spellTarget.x] = WATER_TILE;
+          }
+          else if (grid[spellTarget.y][spellTarget.x] === PLAYER_ON_TILE) {
+            playerAnIdiot = true;
+            gameState = GAME_OVER;
+          }
+          else if (grid[spellTarget.y][spellTarget.x] !== GRASS_TILE) {
             grid[spellTarget.y][spellTarget.x] = GRASS_TILE;
           }
           break;
@@ -399,20 +424,61 @@ class Player {
             gameState = GAME_OVER;
           }
           break;
+        case "erosion":
+          if (grid[spellTarget.y][spellTarget.x] === WET_ROCK_TILE) {
+            grid[spellTarget.y][spellTarget.x] = WATER_TILE;
+          }
+          else if (grid[spellTarget.y][spellTarget.x] === ROCK_TILE) {
+            grid[spellTarget.y][spellTarget.x] = GRASS_TILE;
+          }
         case "fireball":
           for (let i = -1; i <= 1; i++) {
             for (let j = -1; j <= 1; j++) {
               if (grid[spellTarget.y+i][spellTarget.x+j] === GRASS_TILE) {
                 grid[spellTarget.y+i][spellTarget.x+j] = FIRE_TILE;
               }
-              else if (grid[spellTarget.y+i][spellTarget.x+j] === WATER_TILE) {
-                grid[spellTarget.y+i][spellTarget.x+j] = GRASS_TILE;
+              else if (grid[spellTarget.y+i][spellTarget.x+j] === PLAYER_ON_TILE && prevTile === GRASS_TILE) {
+                prevTile = FIRE_TILE;
               }
             }
           }
           break;
-        case "lightning":
-  
+        case "flood":
+          if (grid[spellTarget.y][spellTarget.x] === WATER_TILE) {
+            for (let i = -1; i <= 1; i++) {
+              for (let j = -1; j <= 1; j++) {
+                if (grid[spellTarget.y+i][spellTarget.x+j] === ROCK_TILE) {
+                  grid[spellTarget.y+i][spellTarget.x+j] = WET_ROCK_TILE;
+                }
+                else if (grid[spellTarget.y+i][spellTarget.x+j] === PLAYER_ON_TILE) {
+                  prevTile = WATER_TILE;
+                }
+                else {
+                  grid[spellTarget.y+i][spellTarget.x+j] = WATER_TILE;
+                }
+              }
+            }
+          }
+        case "hydrate":
+        case "water":
+          if (grid[spellTarget.y][spellTarget.x] === ROCK_TILE) {
+            grid[spellTarget.y][spellTarget.x] = WET_ROCK_TILE;
+          }
+          else if (grid[spellTarget.y][spellTarget.x] === PLAYER_ON_TILE) {
+            prevTile = WATER_TILE;
+          }
+          break;
+        case "rock":
+        case "boulder":
+          if (grid[spellTarget.y][spellTarget.x] === WATER_TILE) {
+            grid[spellTarget.y][spellTarget.x] = WET_ROCK_TILE;
+          }
+          else if (grid[spellTarget.y][spellTarget.x] !== PLAYER_ON_TILE) {
+            grid[spellTarget.y][spellTarget.x] = ROCK_TILE;
+          } 
+          break;
+        default:
+          alert("Hey there, what you just typed isn't recognizable language that my javascript case statements can handle. Maybe just cast fireball?");
       }
     }
   }
