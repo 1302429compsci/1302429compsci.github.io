@@ -1,11 +1,14 @@
 // Random Grid Generation
 // Matthew Laskowski
-// November ??, 2026
+// November 21, 2026
 //
 // Extra for Experts:
-// - describe what you did to take this project "above and beyond"
+// - Worked with classes as per usual (almost starting to wonder how long I can get away with using classes as my expert card)
+// - Worked with switch/case, which was very useful in making the spell list look slightly more readable
+
 
 const VERY_HIGH_NUMBER = 2**52;
+const DEFAULT_PLAYER_SPEED = 500;
 
 const GRASS_TILE = 0;
 const WATER_TILE = 1;
@@ -37,6 +40,7 @@ let targetImg;
 
 let playerChar;
 let playerCanMove = true;
+let playerAquatic = false;
 let playerAnIdiot = false;
 let spellTarget = {x: undefined, y: undefined};
 
@@ -44,11 +48,11 @@ let prevTile;
 
 async function setup() {
 
+  cellSize = Math.min(windowWidth, windowHeight) / cols;
   let canvas = createCanvas(windowWidth, windowHeight);
   canvas.parent("canvas-container");
   textAlign(CENTER, CENTER);
   grid = generateRandomTerrain(cols, rows);
-  cellSize = Math.min(width, height) / cols;
   grassImg = await loadImage("grass.png");
   waterImg = await loadImage("water.png");
   rockImg = await loadImage("rock.png");
@@ -56,7 +60,7 @@ async function setup() {
   playWizImg = await loadImage("wizard.png");
   targetImg = await loadImage("target.png");
 
-  playerChar = new Player(10, 19, 500);
+  playerChar = new Player(10, 19, DEFAULT_PLAYER_SPEED);
   playerChar.spawn();
 
 }
@@ -67,6 +71,7 @@ async function setup() {
 
 function draw() {
 
+  // display the according graphics for whatever state the game is in
   displayGameState();
 
 }
@@ -270,6 +275,10 @@ function generateEmptyField(cols, rows) {
 function keyPressed() {
 
   if (gameState === PLAYING_GAME) {
+    if (key === "e") {
+      let spellCast = prompt("Abracadabra alakazam you cast:");
+      playerChar.castSpell(spellCast);
+    }
     if (keyIsDown("w") && keyIsDown("d")) {
       playerChar.move(playerChar.playX + 1, playerChar.playY - 1);
     }
@@ -295,12 +304,12 @@ function keyPressed() {
       playerChar.move(playerChar.playX + 1, playerChar.playY);
     }
   
-    if (key === "r") {
-      grid = generateRandomTerrain(cols, rows);
-    }
-    else if (key === "e") {
-      grid = generateEmptyField(cols, rows);
-    }
+    // if (key === "r") {
+    //   grid = generateRandomTerrain(cols, rows);
+    // }
+    // else if (key === "e") {
+    //   grid = generateEmptyField(cols, rows);
+    // }
   }
 
 }
@@ -377,7 +386,7 @@ class Player {
       prevTile = grid[y][x];
       grid[this.playY][this.playX] = PLAYER_ON_TILE;
       this.playerMoveToggle();
-      console.log(playerCanMove);
+      this.currentPlayerSpeed();
       window.setTimeout(this.playerMoveToggle, this.playSpeed);
     }
   }
@@ -389,6 +398,15 @@ class Player {
 
   playerMoveToggle() {
     playerCanMove = !playerCanMove;
+  }
+
+  currentPlayerSpeed() {
+    if (playerAquatic && prevTile === WATER_TILE) {
+      this.playSpeed = DEFAULT_PLAYER_SPEED / 2;
+    }
+    else {
+      this.playSpeed = DEFAULT_PLAYER_SPEED;
+    }
   }
 
   castSpell(spell) {
@@ -408,10 +426,8 @@ class Player {
           }
           break;
         case "destroy":
-          if (grid[spellTarget.y][spellTarget.x] === WET_ROCK_TILE) {
-            grid[spellTarget.y][spellTarget.x] = WATER_TILE;
-          }
-          else if (grid[spellTarget.y][spellTarget.x] === PLAYER_ON_TILE) {
+        case "eradicate":
+          if (grid[spellTarget.y][spellTarget.x] === PLAYER_ON_TILE) {
             playerAnIdiot = true;
             gameState = GAME_OVER;
           }
@@ -432,6 +448,7 @@ class Player {
           else if (grid[spellTarget.y][spellTarget.x] === ROCK_TILE) {
             grid[spellTarget.y][spellTarget.x] = GRASS_TILE;
           }
+          break;
         case "fireball":
           for (let i = -1; i <= 1; i++) {
             for (let j = -1; j <= 1; j++) {
@@ -445,7 +462,7 @@ class Player {
           }
           break;
         case "flood":
-          if (grid[spellTarget.y][spellTarget.x] === WATER_TILE) {
+          if (grid[spellTarget.y][spellTarget.x] === WATER_TILE || grid[spellTarget.y][spellTarget.x] === WET_ROCK_TILE) {
             for (let i = -1; i <= 1; i++) {
               for (let j = -1; j <= 1; j++) {
                 if (grid[spellTarget.y+i][spellTarget.x+j] === ROCK_TILE) {
@@ -454,7 +471,7 @@ class Player {
                 else if (grid[spellTarget.y+i][spellTarget.x+j] === PLAYER_ON_TILE) {
                   prevTile = WATER_TILE;
                 }
-                else {
+                else if (grid[spellTarget.y+i][spellTarget.x+j] === GRASS_TILE || grid[spellTarget.y+i][spellTarget.x+j] === FIRE_TILE) {
                   grid[spellTarget.y+i][spellTarget.x+j] = WATER_TILE;
                 }
               }
@@ -469,6 +486,9 @@ class Player {
           else if (grid[spellTarget.y][spellTarget.x] === PLAYER_ON_TILE) {
             prevTile = WATER_TILE;
           }
+          else if (grid[spellTarget.y][spellTarget.x] === GRASS_TILE || grid[spellTarget.y][spellTarget.x] === FIRE_TILE) {
+            grid[spellTarget.y][spellTarget.x] = WATER_TILE;
+          }
           break;
         case "rock":
         case "boulder":
@@ -479,6 +499,15 @@ class Player {
             grid[spellTarget.y][spellTarget.x] = ROCK_TILE;
           } 
           break;
+        case "swim":
+          if (grid[spellTarget.y][spellTarget.x] === PLAYER_ON_TILE) {
+            playerAquatic = true;
+          }
+          break;
+        // case "trap":
+        //   if (grid[spellTarget.y][spellTarget.x] === ROCK_TILE || grid[spellTarget.y][spellTarget.x] === WET_ROCK_TILE) {
+
+        //   break;
         default:
           alert("Hey there, what you just typed isn't recognizable language that my javascript case statements can handle. Maybe just cast fireball?");
       }
