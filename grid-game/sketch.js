@@ -50,6 +50,7 @@ async function setup() {
 
   cellSize = Math.min(windowWidth, windowHeight) / cols;
   let canvas = createCanvas(windowWidth, windowHeight);
+  // let canvas = createCanvas(cols*cellSize, rows*cellSize);
   canvas.parent("canvas-container");
   textAlign(CENTER, CENTER);
   grid = generateRandomTerrain(cols, rows);
@@ -90,6 +91,7 @@ function displayGameState() {
   else if (gameState === PLAYING_GAME) {
     background(100, 150, 0);
     displayGrid();
+    playerChar.spellLine();
   }
   else if (gameState === GAME_OVER) {
     if (playerAnIdiot) {
@@ -161,13 +163,13 @@ function displayTitleScreen() {
 
   imageMode(CENTER);
 
-  textSize(100);
-  text("AN OKAY GRID GAME", windowWidth/2, windowHeight/10);
-  textSize(40);
-  text("BY SOMEONE NOT MAKING ANOTHER PLATFORMER (FOR NOW)", windowWidth/2, windowHeight/5);
-  textSize(55);
-  text("PRESS ANY MOUSE BUTTON TO BEGIN", windowWidth/2, windowHeight/1.2);
-  image(playWizImg, windowWidth/2, windowHeight/2, windowWidth/5, windowHeight/5);
+  textSize(Math.min(width, height)/12);
+  text("AN OKAY GRID GAME", width/2, height/10);
+  textSize(Math.min(width, height)/35);
+  text("BY SOMEONE NOT MAKING ANOTHER PLATFORMER (FOR NOW)", width/2, height/5);
+  textSize(Math.min(width, height)/20);
+  text("PRESS ANY MOUSE BUTTON TO BEGIN", width/2, height/1.2);
+  image(playWizImg, width/2, height/2, width/4, height/4);
 
 }
 
@@ -324,7 +326,7 @@ function mousePressed() {
       spellTarget.y = Math.floor(mouseY/cellSize);
     }
     else if (mouseButton.center) {
-      let spellCast = prompt("Bippity Boppity you cast:");
+      let spellCast = prompt("Abracadabra alakazam you cast:");
       playerChar.castSpell(spellCast);
     }
   }
@@ -378,7 +380,7 @@ class Player {
 
   move(x, y) {
 
-    if (x >= 0 && x < cols && y >= 0 && y < rows && grid[y][x] !== ROCK_TILE && playerCanMove) {
+    if (x >= 0 && x < cols && y >= 0 && y < rows && grid[y][x] !== ROCK_TILE && grid[y][x] !== WET_ROCK_TILE && playerCanMove) {
       grid[this.playY][this.playX] = prevTile;
       console.log(prevTile);
       this.playX = x;
@@ -406,6 +408,12 @@ class Player {
     }
     else {
       this.playSpeed = DEFAULT_PLAYER_SPEED;
+    }
+  }
+
+  spellLine() {
+    if (spellTarget.x !== undefined) {
+      line(spellTarget.x, spellTarget.y, this.playX, this.playY);
     }
   }
 
@@ -504,10 +512,6 @@ class Player {
             playerAquatic = true;
           }
           break;
-        // case "trap":
-        //   if (grid[spellTarget.y][spellTarget.x] === ROCK_TILE || grid[spellTarget.y][spellTarget.x] === WET_ROCK_TILE) {
-
-        //   break;
         default:
           alert("Hey there, what you just typed isn't recognizable language that my javascript case statements can handle. Maybe just cast fireball?");
       }
