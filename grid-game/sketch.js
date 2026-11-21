@@ -7,9 +7,10 @@
 // - Worked with switch/case, which was very useful in making the spell list look slightly more readable
 
 
-const VERY_HIGH_NUMBER = 2**52;
+// constants related to the player
 const DEFAULT_PLAYER_SPEED = 500;
 
+// constants relating to grid tiles
 const GRASS_TILE = 0;
 const WATER_TILE = 1;
 const ROCK_TILE = 2;
@@ -17,20 +18,23 @@ const WET_ROCK_TILE = 3;
 const FIRE_TILE = 4;
 const PLAYER_ON_TILE = 99;
 
+// constants relating to gameState
 const TITLE_SCREEN = "title screen";
 const SELECT_SCREEN = "select screen";
 const PLAYING_GAME = "playing game";
 const GAME_OVER = "game over";
 
+// variables that control the grid
 let cols = 21;
 let rows = 21;
 let grid;
 let cellSize;
-let gameState = TITLE_SCREEN;
-let backgroundRed = 150;
-let backgroundGreen = 150;
-let backgroundBlue = 150;
 
+// more gameState controls, with backgroundColors controlling the start screen background
+let gameState = TITLE_SCREEN;
+let backgroundColors = {red: 150, blue: 150, green: 150};
+
+// all images used in the game
 let grassImg;
 let waterImg;
 let rockImg;
@@ -38,13 +42,14 @@ let fireImg;
 let playWizImg;
 let targetImg;
 
+// all player based variables, along with the player's spell target and their previous tile
 let playerChar;
 let playerCanMove = true;
 let playerAquatic = false;
 let playerAnIdiot = false;
 let spellTarget = {x: undefined, y: undefined};
-
 let prevTile;
+
 
 async function setup() {
 
@@ -61,7 +66,7 @@ async function setup() {
   playWizImg = await loadImage("wizard.png");
   targetImg = await loadImage("target.png");
 
-  playerChar = new Player(10, 19, DEFAULT_PLAYER_SPEED);
+  playerChar = new Player(10, 19, "wizard");
   playerChar.spawn();
 
 }
@@ -92,6 +97,7 @@ function displayGameState() {
     background(100, 150, 0);
     displayGrid();
     playerChar.spellLine();
+    playerChar.playerStatBars();
   }
   else if (gameState === GAME_OVER) {
     if (playerAnIdiot) {
@@ -361,9 +367,9 @@ function mousePressed() {
 
 function shiftBackgroundColor() {
 
-  backgroundRed += random(-2, 2);
-  backgroundGreen += random(-2, 2);
-  backgroundBlue += random(-2, 2);
+  backgroundColors.red += random(-2, 2);
+  backgroundColors.green += random(-2, 2);
+  backgroundColors.blue += random(-2, 2);
 
 }
 
@@ -372,10 +378,18 @@ function shiftBackgroundColor() {
 // PLAYER CLASS
 class Player {
 
-  constructor(playX, playY, playSpeed) {
+  constructor(playX, playY, role) {
     this.playX = playX;
     this.playY = playY;
-    this.playSpeed = playSpeed;
+    this.role = role;
+    switch(this.role) {
+      case "wizard":
+        this.playSpeed = DEFAULT_PLAYER_SPEED;
+        this.playMaxHp = 100;
+        this.playHp = 100;
+        this.playMaxMana = 1000;
+        this.playMana = 1000;
+    }
   }
 
   move(x, y) {
@@ -406,14 +420,32 @@ class Player {
     if (playerAquatic && prevTile === WATER_TILE) {
       this.playSpeed = DEFAULT_PLAYER_SPEED / 2;
     }
+    else if (prevTile === WATER_TILE) {
+      this.playSpeed = DEFAULT_PLAYER_SPEED * 2;
+    }
     else {
       this.playSpeed = DEFAULT_PLAYER_SPEED;
     }
   }
 
+  playerStatBars() {
+    fill(255, 0, 0);
+    rect(cols * cellSize, 0, cellSize, windowHeight);
+    fill(0, 255, 0);
+    rect(cols * cellSize, height, cellSize, -height * (this.playHp/this.playMaxHp));
+
+    fill(150, 150, 150);
+    rect((cols + 1) * cellSize, 0, cellSize, windowHeight);
+    fill(0, 0, 255);
+    rect((cols + 1) * cellSize, height, cellSize, -height * (this.playMana/this.playMaxMana));
+  }
+
   spellLine() {
     if (spellTarget.x !== undefined) {
-      line(spellTarget.x, spellTarget.y, this.playX, this.playY);
+      noStroke();
+      let targetX = spellTarget.x * cellSize + cellSize/2;
+      let targetY = spellTarget.y * cellSize + cellSize/2;
+      line(targetX, targetY, this.playX * cellSize + cellSize/2, this.playY * cellSize + cellSize/2);
     }
   }
 
