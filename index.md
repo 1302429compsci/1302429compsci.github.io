@@ -19,6 +19,7 @@
 - [setTimeout](16-set-timeout)
 - [setInterval](17-set-interval)
 - [Walker OOP](18-walker)
+- [Fireworks/Particle Demo](19-particles)
 
 ## Projects
 - [Interactive Scene](scene)
