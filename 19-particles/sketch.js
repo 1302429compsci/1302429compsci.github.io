@@ -1,6 +1,6 @@
 // Fireworks/Particles OOP Demo
 
-const PARTICLES_PER_CLICK = 10000;
+const PARTICLES_PER_CLICK = 100000;
 
 class Particle {
 
@@ -10,9 +10,9 @@ class Particle {
     this.dx = random(-5, 5);
     this.dy = random(-5, 5);
     this.diameter = 5;
-    this.r = 255;
-    this.g = 0;
-    this.b = 0;
+    this.r = random(255);
+    this.g = random(255);
+    this.b = random(255);
     this.opacity = 255;
   }
 
@@ -31,6 +31,17 @@ class Particle {
     this.opacity--;
   }
 
+  removeParticle() {
+    if (this.opacity === 0) {
+      return true;
+    }
+    else if (random(100) < 99) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
   
 }
 
@@ -41,16 +52,22 @@ async function setup() {
 }
 
 function draw() {
-  background(220);
+  background("black");
 
-  for (let i = theFireworks.length; i >= 0; i--) {
-    firework.update();
-    firework.display();
+  for (let firework of theFireworks) {
+    if (firework.removeParticle()) {
+      let index = theFireworks.indexOf(firework);
+      theFireworks.splice(index, 1);
+    }
+    else {
+      firework.update();
+      firework.display();
+    }
   }
 
 }
 
-function mouseDragged() {
+function mousePressed() {
   for (let i = PARTICLES_PER_CLICK; i >= 0; i--) {
     let someFirework = new Particle(mouseX, mouseY);
     theFireworks.push(someFirework);
